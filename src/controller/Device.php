@@ -18,23 +18,43 @@ declare (strict_types=1);
 
 namespace plugin\account\controller;
 
+use plugin\account\model\PluginAccountBind;
 use think\admin\Controller;
+use think\admin\helper\QueryHelper;
 
 /**
- * 用户终端管理
+ * 用户子账号管理
  * Class Device
  * @package plugin\account\controller\user
  */
 class Device extends Controller
 {
     /**
-     * 用户终端管理
+     * 用户子账号管理
      * @auth true
      * @menu true
-     * @return string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
-    public function index(): string
+    public function index()
     {
-        return __METHOD__;
+        PluginAccountBind::mQuery()->layTable(function () {
+            $this->title = '用户子账号管理';
+        }, function (QueryHelper $query) {
+            $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
+        });
+    }
+
+    /**
+     * 修改子用户状态
+     * @auth true
+     */
+    public function state()
+    {
+        PluginAccountBind::mSave($this->_vali([
+            'status.in:0,1'  => '状态值范围异常！',
+            'status.require' => '状态值不能为空！',
+        ]));
     }
 }

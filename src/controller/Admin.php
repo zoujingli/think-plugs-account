@@ -18,39 +18,45 @@ declare (strict_types=1);
 
 namespace plugin\account\controller;
 
-use plugin\account\service\Account;
+use plugin\account\model\PluginAccountUser;
 use think\admin\Controller;
+use think\admin\helper\QueryHelper;
 
 /**
- * 普通用户管理
+ * 用户主账号管理
  * Class User
  * @package plugin\account\controller\user
  */
 class Admin extends Controller
 {
     /**
-     * 普通用户管理
+     * 用户主账号管理
      * @auth true
      * @menu true
+     * @return void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
-    public function index(): string
+    public function index()
     {
-
-        $token = '';
-        $account = Account::mk(Account::CHANNEL_WAP, $token);
-
-        $result = $account->set(
-            ['phone' => '13617343812', 'username' => 'Anyon'], true
-        );
-
-        return __METHOD__;
+        $this->type = $this->get['type'] ?? 'index';
+        PluginAccountUser::mQuery()->layTable(function () {
+            $this->title = '用户主账号管理';
+        }, function (QueryHelper $query) {
+            $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
+        });
     }
 
     /**
-     * 修改用户状态
+     * 修改主账号状态
      * @auth true
      */
     public function state()
     {
+        PluginAccountUser::mSave($this->_vali([
+            'status.in:0,1'  => '状态值范围异常！',
+            'status.require' => '状态值不能为空！',
+        ]));
     }
 }

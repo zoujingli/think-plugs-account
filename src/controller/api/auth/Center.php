@@ -27,32 +27,27 @@ class Center extends Auth
 {
     /**
      * 更新用户资料
+     * @return void
      */
     public function set()
     {
         $data = $this->_vali([
-            'headimg.default'       => '',
-            'username.default'      => '',
-            'base_age.default'      => '',
-            'base_sex.default'      => '',
-            'base_height.default'   => '',
-            'base_weight.default'   => '',
-            'base_birthday.default' => '',
+            'headimg.default'  => '',
+            'username.default' => '',
         ]);
+
         foreach ($data as $key => $vo) if ($vo === '') unset($data[$key]);
         if (empty($data)) $this->error('没有修改的数据！');
-        if (DataUser::mk()->where(['id' => $this->uuid])->update($data) !== false) {
-            $this->success('更新资料成功！', $this->getUser());
-        } else {
-            $this->error('更新资料失败！');
-        }
+
+        $this->success('更新用户资料！', $this->account->set($data));
     }
 
     /**
      * 获取用户资料
+     * @return void
      */
     public function get()
     {
-        $this->success('获取用户资料', $this->account->get());
+        $this->success('获取用户资料！', $this->account->get());
     }
 }

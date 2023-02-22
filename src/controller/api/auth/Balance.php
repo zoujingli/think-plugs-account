@@ -14,35 +14,28 @@
 // | github 代码仓库：https://github.com/zoujingli/think-plugs-account
 // +----------------------------------------------------------------------
 
-declare (strict_types=1);
+namespace plugin\account\controller\api\auth;
 
-namespace plugin\account\controller;
-
+use plugin\account\controller\api\Auth;
 use plugin\account\model\PluginAccountUserBalance;
-use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 
 /**
- * 用户余额管理
+ * 用户余额转账
  * Class Balance
- * @package plugin\account\controller\user
+ * @package plugin\account\controller\api\auth
  */
-class Balance extends Controller
+class Balance extends Auth
 {
     /**
-     * 用户余额管理
-     * @auth true
-     * @menu true
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
+     * 获取余额记录
      */
-    public function index()
+    public function get()
     {
-        PluginAccountUserBalance::mQuery()->layTable(function () {
-            $this->title = '用户余额管理';
-        }, function (QueryHelper $query) {
-            $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
+        PluginAccountUserBalance::mQuery(null, function (QueryHelper $query) {
+            $query->withoutField('deleted,create_by');
+            $query->where(['umid' => $this->umid, 'deleted' => 0])->like('create_time#date');
+            $this->success('获取数据成功！', $query->order('id desc')->page(true, false, false, 10));
         });
     }
 }
