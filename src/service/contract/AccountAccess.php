@@ -144,7 +144,7 @@ class AccountAccess implements AccountInterface
      */
     public function get(bool $rejwt = false): array
     {
-        $data = $this->device->toArray();
+        $data = $this->device->hidden(['password'])->toArray();
         if ($this->device->isExists()) {
             $data['user'] = $this->device->user()->findOrEmpty()->toArray();
             if ($rejwt) $data['token'] = JwtExtend::getToken([
