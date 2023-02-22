@@ -39,6 +39,7 @@ class Device extends Controller
      */
     public function index()
     {
+        $this->type = $this->get['type'] ?? 'index';
         PluginAccountBind::mQuery()->layTable(function () {
             $this->title = '用户子账号管理';
         }, function (QueryHelper $query) {

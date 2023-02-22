@@ -39,6 +39,7 @@ class Balance extends Controller
      */
     public function index()
     {
+        $this->type = $this->get['type'] ?? 'index';
         PluginAccountUserBalance::mQuery()->layTable(function () {
             $this->title = '用户余额管理';
         }, function (QueryHelper $query) {
