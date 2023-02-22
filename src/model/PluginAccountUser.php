@@ -19,6 +19,7 @@ declare (strict_types=1);
 namespace plugin\account\model;
 
 use think\admin\Model;
+use think\model\relation\HasMany;
 
 /**
  * 账号资料数据模型
@@ -27,6 +28,16 @@ use think\admin\Model;
  */
 class PluginAccountUser extends Model
 {
+
+    /**
+     * 关联子账号数据
+     * @return \think\model\relation\HasMany
+     */
+    public function binds(): HasMany
+    {
+        return $this->hasMany(PluginAccountBind::class, 'umid', 'id');
+    }
+
     /**
      * 字段属性处理
      * @param mixed $value

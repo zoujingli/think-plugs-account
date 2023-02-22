@@ -51,13 +51,13 @@ class Wechat extends Controller
      * 微信调度器
      * @var WechatService
      */
-    protected $wechat;
+    private $wechat;
 
     /**
      * 接口原地址
      * @var string
      */
-    protected $target;
+    private $target;
 
     /**
      * 控制器初始化

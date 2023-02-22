@@ -29,7 +29,7 @@ use think\model\relation\HasOne;
 class PluginAccountAuth extends Model
 {
     /**
-     * 获取绑定授权
+     * 关联子账号数据
      * @return \think\model\relation\HasOne
      */
     public function device(): HasOne

@@ -19,22 +19,32 @@ declare (strict_types=1);
 namespace plugin\account\model;
 
 use think\admin\Model;
+use think\model\relation\HasMany;
 use think\model\relation\HasOne;
 
 /**
- * 设备账号数据模型
+ * 子账号数据模型
  * @class PluginAccountBind
  * @package plugin\account\model
  */
 class PluginAccountBind extends Model
 {
     /**
-     * 关联用户资料
+     * 关联主账号数据
      * @return \think\model\relation\HasOne
      */
     public function user(): HasOne
     {
         return $this->hasOne(PluginAccountUser::class, 'id', 'umid');
+    }
+
+    /**
+     * 关联授权数据
+     * @return \think\model\relation\HasMany
+     */
+    public function auths(): HasMany
+    {
+        return $this->hasMany(PluginAccountAuth::class, 'unid', 'id');
     }
 
     /**
