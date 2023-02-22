@@ -19,7 +19,8 @@ declare (strict_types=1);
 namespace plugin\account\service\contract;
 
 use plugin\account\model\PluginAccountAuth;
-use plugin\account\model\PluginAccountDevice;
+use plugin\account\model\PluginAccountBind;
+use plugin\account\model\PluginAccountUser;
 use think\admin\Exception;
 use think\admin\extend\JwtExtend;
 use think\App;
@@ -63,7 +64,7 @@ class AccountAccess implements AccountInterface
 
     /**
      * 当前用户终端
-     * @var PluginAccountDevice
+     * @var PluginAccountBind
      */
     protected $device;
 
@@ -94,14 +95,107 @@ class AccountAccess implements AccountInterface
     public function init(string $token = ''): AccountInterface
     {
         if (!empty($token)) {
-            $map = ['type' => $this->type, 'token' => $token];
-            $this->auther = PluginAccountAuth::mk()->with('device')->where($map)->findOrEmpty();
-            $this->device = $this->auther->device ?? PluginAccountDevice::mk();
+            $map = ['type' => $this->type, 'token' => $token, 'deleted' => 0];
+            $this->auther = PluginAccountAuth::mk()->where($map)->findOrEmpty();
+            $this->device = $this->auther->device()->findOrEmpty();
         } else {
             $this->auther = PluginAccountAuth::mk();
-            $this->device = PluginAccountDevice::mk();
+            $this->device = PluginAccountBind::mk();
         }
         return $this;
+    }
+
+    /**
+     * 更新用户用户参数
+     * @param array $data 更新数据
+     * @param boolean $rejwt 返回令牌
+     * @return array
+     * @throws \think\admin\Exception
+     * @throws \think\db\exception\DbException
+     */
+    public function set(array $data = [], bool $rejwt = false): array
+    {
+        $data['type'] = $this->type;
+        // 如果传入授权验证字段
+        if (isset($data[$this->field]) && $data[$this->field]) {
+            if ($this->device->isExists()) {
+                if ($data[$this->field] !== $this->device[$this->field]) {
+                    throw new Exception('禁用替换用户禁用');
+                }
+            } else {
+                $map = [$this->field => $data[$this->field]];
+                $this->device = PluginAccountBind::mk()->where($map)->findOrEmpty();
+            }
+        } elseif ($this->device->isEmpty()) {
+            throw new Exception("必要字段 {$this->field} 不能为空！");
+        }
+        $this->device = $this->save($data);
+        if ($this->device->isEmpty()) {
+            throw new Exception("更新用户资料失败！");
+        } else {
+            return $this->token(intval($this->device['id']))->get($rejwt);
+        }
+    }
+
+    /**
+     * 获取用户数据
+     * @param boolean $rejwt 返回令牌
+     * @return array
+     */
+    public function get(bool $rejwt = false): array
+    {
+        $data = $this->device->toArray();
+        if ($this->device->isExists()) {
+            $data['user'] = $this->device->user()->findOrEmpty()->toArray();
+            if ($rejwt) $data['token'] = JwtExtend::getToken([
+                'type'  => $this->auther->getAttr('type'),
+                'token' => $this->auther->getAttr('token'),
+            ]);
+        }
+        return $data;
+    }
+
+    /**
+     * 绑定用户主账号
+     * @param array $map 关联条件
+     * @param array $data 用户数据
+     * @return array
+     * @throws \think\admin\Exception
+     */
+    public function bind(array $map, array $data = []): array
+    {
+        if ($this->device->isEmpty()) {
+            throw new Exception('终端用户不存在！');
+        }
+        $user = PluginAccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
+        if ($this->device['umid'] > 0 && ($user->isEmpty() || $this->device['umid'] !== $user['id'])) {
+            throw new Exception("已绑定其他用户！");
+        }
+        if (!empty($data['extra'])) {
+            $extra = $user->getAttr('extra');
+            $user->setAttr('extra', $extra + $data['extra']);
+            unset($data['extra']);
+        }
+        if ($user->save($data + $map) && $user->isExists()) {
+            $this->device->save(['umid' => $user['id']]);
+            return $this->get();
+        } else {
+            throw new Exception('绑定用户失败！');
+        }
+    }
+
+    /**
+     * 解析用户主账号
+     * @return array
+     * @throws \think\admin\Exception
+     */
+    public function unbind(): array
+    {
+        if ($this->device->isEmpty()) {
+            throw new Exception('终端资料不存在！');
+        }
+        $this->device->save(['umid' => 0]);
+        return $this->get();
     }
 
     /**
@@ -123,53 +217,6 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 更新用户用户参数
-     * @param array $data 更新数据
-     * @param bool $rejwt 返回令牌
-     * @return array
-     * @throws \think\admin\Exception
-     * @throws \think\db\exception\DbException
-     */
-    public function set(array $data = [], bool $rejwt = false): array
-    {
-        $data['type'] = $this->type;
-        // 如果传入授权验证字段
-        if (isset($data[$this->field]) && $data[$this->field]) {
-            if ($this->device->isExists()) {
-                if ($data[$this->field] !== $this->device[$this->field]) {
-                    throw new Exception('禁用强行替换用户');
-                }
-            } else {
-                $map = [$this->field => $data[$this->field]];
-                $this->device = PluginAccountDevice::mk()->where($map)->findOrEmpty();
-            }
-        } elseif ($this->device->isEmpty()) {
-            throw new Exception("必要字段 {$this->field} 不能为空！");
-        }
-        $this->device = $this->save($data);
-        if ($this->device->isEmpty()) {
-            throw new Exception("更新用户资料失败！");
-        } else {
-            return $this->token(intval($this->device['id']))->get($rejwt);
-        }
-    }
-
-    /**
-     * 获取用户数据
-     * @param bool $rejwt 返回令牌
-     * @return array
-     */
-    public function get(bool $rejwt = false): array
-    {
-        $data = $this->device->toArray();
-        if ($rejwt) $data['jwtauth'] = JwtExtend::getToken([
-            'type'  => $this->auther->getAttr('type'),
-            'token' => $this->auther->getAttr('token'),
-        ]);
-        return $data;
-    }
-
-    /**
      * 生成新的用户令牌
      * @param integer $unid
      * @return \plugin\account\service\contract\AccountInterface
@@ -178,10 +225,9 @@ class AccountAccess implements AccountInterface
     public function token(int $unid): AccountInterface
     {
         // 清理无效令牌
-        PluginAccountAuth::mk()
-            ->where('token', '<>', $this->tester)
-            ->whereBetween('expire', [1, time()])->delete();
+        PluginAccountAuth::mk()->where('token', '<>', $this->tester)->whereBetween('expire', [1, time()])->delete();
 
+        // 刷新登录令牌
         if ($this->auther->isEmpty()) {
             $this->auther = PluginAccountAuth::mk()->where(['unid' => $unid])->findOrEmpty();
         }
@@ -213,21 +259,23 @@ class AccountAccess implements AccountInterface
     /**
      * 保存更新用户资料
      * @param array $data
-     * @return \plugin\account\model\PluginAccountDevice
+     * @return \plugin\account\model\PluginAccountBind
      * @throws \think\admin\Exception
      */
-    protected function save(array $data): PluginAccountDevice
+    protected function save(array $data): PluginAccountBind
     {
         if (empty($data)) {
-            throw new Exception('更新数据不能为空！');
+            throw new Exception('用户数据不能为空！');
         }
-        if ($this->device->isEmpty()) {
-            $this->device->setAttr('extra', $data);
-        } else {
+        if (!empty($data['extra'])) {
             $extra = $this->device->getAttr('extra');
-            $this->device->setAttr('extra', $extra + $data);
+            $this->device->setAttr('extra', $extra + $data['extra']);
+            unset($data['extra']);
         }
-        $this->device->save($data);
-        return $this->device;
+        if ($this->device->save($data) && $this->device->isExists()) {
+            return $this->device->refresh();
+        } else {
+            throw new Exception('用户数据保存失败！');
+        }
     }
 }

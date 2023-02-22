@@ -20,8 +20,32 @@ namespace plugin\account\model;
 
 use think\admin\Model;
 
+/**
+ * 账号资料数据模型
+ * @class PluginAccountUser
+ * @package plugin\account\model
+ */
 class PluginAccountUser extends Model
 {
+    /**
+     * 字段属性处理
+     * @param mixed $value
+     * @return string
+     */
+    public function setExtraAttr($value): string
+    {
+        return is_string($value) ? $value : json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * 字段属性处理
+     * @param mixed $value
+     * @return array
+     */
+    public function getExtraAttr($value): array
+    {
+        return empty($value) ? [] : (is_string($value) ? json_decode($value, true) : $value);
+    }
 
     /**
      * 格式化输出时间

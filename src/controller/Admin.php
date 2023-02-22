@@ -35,12 +35,14 @@ class Admin extends Controller
      */
     public function index(): string
     {
+
         $token = '';
-        $result = Account::mk(Account::CHANNEL_WAP, $token)->set(
-            ['phone' => '13617343800'],
-            ['username' => 'Anyon']
+        $account = Account::mk(Account::CHANNEL_WAP, $token);
+
+        $result = $account->set(
+            ['phone' => '13617343812', 'username' => 'Anyon'], true
         );
-        dump($result);
+
         return __METHOD__;
     }
 

@@ -21,6 +21,11 @@ namespace plugin\account\model;
 use think\admin\Model;
 use think\model\relation\HasOne;
 
+/**
+ * 账号授权数据模型
+ * @class PluginAccountAuth
+ * @package plugin\account\model
+ */
 class PluginAccountAuth extends Model
 {
     /**
@@ -29,7 +34,7 @@ class PluginAccountAuth extends Model
      */
     public function device(): HasOne
     {
-        return $this->hasOne(PluginAccountDevice::class, 'id', 'unid')->with(['user']);
+        return $this->hasOne(PluginAccountBind::class, 'id', 'unid')->with(['user']);
     }
 
     /**

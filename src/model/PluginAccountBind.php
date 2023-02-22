@@ -21,7 +21,12 @@ namespace plugin\account\model;
 use think\admin\Model;
 use think\model\relation\HasOne;
 
-class PluginAccountDevice extends Model
+/**
+ * 设备账号数据模型
+ * @class PluginAccountBind
+ * @package plugin\account\model
+ */
+class PluginAccountBind extends Model
 {
     /**
      * 关联用户资料
@@ -29,7 +34,7 @@ class PluginAccountDevice extends Model
      */
     public function user(): HasOne
     {
-        return $this->hasOne(PluginAccountUser::class, 'id', 'umid')->hidden(['password']);
+        return $this->hasOne(PluginAccountUser::class, 'id', 'umid');
     }
 
     /**

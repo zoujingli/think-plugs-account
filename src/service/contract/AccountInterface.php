@@ -47,6 +47,20 @@ interface AccountInterface
     public function init(string $token = ''): AccountInterface;
 
     /**
+     * 绑定用户资料
+     * @param array $map
+     * @param array $data
+     * @return array
+     */
+    public function bind(array $map, array $data = []): array;
+
+    /**
+     * 解绑用户主资料
+     * @return mixed
+     */
+    public function unbind(): array;
+
+    /**
      * 检查令牌是否有效
      * @return array
      * @throws \think\admin\Exception
