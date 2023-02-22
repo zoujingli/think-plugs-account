@@ -1,7 +1,6 @@
 {
   "type": "think-admin-plugin",
   "name": "zoujingli/think-plugs-account",
-  "license": "Apache-2.0",
   "homepage": "https://thinkadmin.top",
   "description": "Account Plugin for ThinkAdmin",
   "authors": [
