@@ -14,61 +14,62 @@
 // | github 代码仓库：https://github.com/zoujingli/think-plugs-account
 // +----------------------------------------------------------------------
 
-
 declare (strict_types=1);
 
 namespace plugin\account\service\contract;
 
 /**
  * 用户账号接口类
+ * @class AccountInterface
+ * @package plugin\account\service\contract
  */
 interface AccountInterface
 {
     /**
-     * 读取账号资料
+     * 读取子账号资料
      * @param boolean $rejwt
      * @return array
      */
     public function get(bool $rejwt = false): array;
 
     /**
-     * 设置账号资料
+     * 设置子账号资料
      * @param array $data 用户资料
-     * @param boolean $rejwt
+     * @param boolean $rejwt 返回令牌
      * @return array
      */
     public function set(array $data = [], bool $rejwt = false): array;
 
     /**
-     * 初始化账号通道
+     * 初始化通道
      * @param string $token
      * @return \plugin\account\service\contract\AccountInterface
      */
     public function init(string $token = ''): AccountInterface;
 
     /**
-     * 绑定用户资料
-     * @param array $map
-     * @param array $data
+     * 绑定主账号
+     * @param array $map 主账号条件
+     * @param array $data 主账号资料
      * @return array
      */
     public function bind(array $map, array $data = []): array;
 
     /**
-     * 解绑用户主资料
-     * @return mixed
+     * 解绑主账号
+     * @return array
      */
     public function unbind(): array;
 
     /**
-     * 检查令牌是否有效
+     * 检查是否有效
      * @return array
      * @throws \think\admin\Exception
      */
     public function check(): array;
 
     /**
-     * 生成新的用户令牌
+     * 生成授权令牌
      * @param integer $unid
      * @return \plugin\account\service\contract\AccountInterface
      * @throws \think\db\exception\DbException
@@ -76,7 +77,7 @@ interface AccountInterface
     public function token(int $unid): AccountInterface;
 
     /**
-     * 延期令牌的有效时间
+     * 延期令牌时间
      * @return \plugin\account\service\contract\AccountInterface
      */
     public function expire(): AccountInterface;

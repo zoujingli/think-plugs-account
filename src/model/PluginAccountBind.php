@@ -23,14 +23,14 @@ use think\model\relation\HasMany;
 use think\model\relation\HasOne;
 
 /**
- * 子账号数据模型
+ * 用户子账号模型
  * @class PluginAccountBind
  * @package plugin\account\model
  */
 class PluginAccountBind extends Model
 {
     /**
-     * 关联主账号数据
+     * 关联主账号
      * @return \think\model\relation\HasOne
      */
     public function user(): HasOne

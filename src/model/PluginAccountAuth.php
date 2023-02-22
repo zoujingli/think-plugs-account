@@ -22,14 +22,14 @@ use think\admin\Model;
 use think\model\relation\HasOne;
 
 /**
- * 账号授权数据模型
+ * 子账号授权模型
  * @class PluginAccountAuth
  * @package plugin\account\model
  */
 class PluginAccountAuth extends Model
 {
     /**
-     * 关联子账号数据
+     * 关联子账号
      * @return \think\model\relation\HasOne
      */
     public function device(): HasOne

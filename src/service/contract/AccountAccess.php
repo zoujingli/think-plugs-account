@@ -75,7 +75,7 @@ class AccountAccess implements AccountInterface
     protected $tester = 'tester';
 
     /**
-     * 账号通道构造方法
+     * 通道构造方法
      * @param \think\App $app
      * @param string $type 通道类型
      * @param string $field 授权字段
@@ -88,7 +88,7 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 初始化账号通道
+     * 初始化通道
      * @param string $token
      * @return \plugin\account\service\contract\AccountInterface
      */
@@ -106,8 +106,8 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 更新用户用户参数
-     * @param array $data 更新数据
+     * 设置子账号资料
+     * @param array $data 用户资料
      * @param boolean $rejwt 返回令牌
      * @return array
      * @throws \think\admin\Exception
@@ -156,9 +156,9 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 绑定用户主账号
-     * @param array $map 关联条件
-     * @param array $data 用户数据
+     * 绑定主账号
+     * @param array $map 主账号条件
+     * @param array $data 主账号资料
      * @return array
      * @throws \think\admin\Exception
      */
@@ -185,7 +185,7 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 解析用户主账号
+     * 解绑主账号
      * @return array
      * @throws \think\admin\Exception
      */
@@ -199,7 +199,7 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 检查令牌是否有效
+     * 检查是否有效
      * @return array
      * @throws \think\admin\Exception
      */
@@ -217,7 +217,7 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 生成新的用户令牌
+     * 生成授权令牌
      * @param integer $unid
      * @return \plugin\account\service\contract\AccountInterface
      * @throws \think\db\exception\DbException
@@ -244,7 +244,7 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 延期令牌有效时间
+     * 延期令牌时间
      * @return \plugin\account\service\contract\AccountInterface
      */
     public function expire(): AccountInterface
@@ -257,7 +257,7 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 保存更新用户资料
+     * 更新用户资料
      * @param array $data
      * @return \plugin\account\model\PluginAccountBind
      * @throws \think\admin\Exception

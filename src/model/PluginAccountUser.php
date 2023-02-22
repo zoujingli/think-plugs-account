@@ -22,7 +22,7 @@ use think\admin\Model;
 use think\model\relation\HasMany;
 
 /**
- * 账号资料数据模型
+ * 用户主账号模型
  * @class PluginAccountUser
  * @package plugin\account\model
  */
@@ -30,7 +30,7 @@ class PluginAccountUser extends Model
 {
 
     /**
-     * 关联子账号数据
+     * 关联子账号
      * @return \think\model\relation\HasMany
      */
     public function binds(): HasMany

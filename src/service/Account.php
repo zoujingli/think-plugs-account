@@ -23,7 +23,7 @@ use plugin\account\service\contract\AccountInterface;
 use think\admin\Exception;
 
 /**
- * 前端用户处理
+ * 前端用户调度器
  * Class Account
  * @package plugin\account\service
  */
@@ -38,34 +38,16 @@ abstract class Account
 
     const types = [
         // 接口支付配置（不需要的直接注释）
-        self::CHANNEL_WAP     => [
-            'name'  => '手机浏览器',
-            'field' => 'phone',
-        ],
-        self::CHANNEL_WEB     => [
-            'name'  => '电脑浏览器',
-            'field' => 'phone',
-        ],
-        self::CHANNEL_WXAPP   => [
-            'name'  => '微信小程序',
-            'field' => 'openid',
-        ],
-        self::CHANNEL_WECHAT  => [
-            'name'  => '微信服务号',
-            'field' => 'openid',
-        ],
-        self::CHANNEL_IOSAPP  => [
-            'name'  => '苹果APP应用',
-            'field' => 'phone',
-        ],
-        self::CHANNEL_ANDROID => [
-            'name'  => '安卓APP应用',
-            'field' => 'phone',
-        ],
+        self::CHANNEL_WAP     => ['name' => '手机浏览器', 'field' => 'phone'],
+        self::CHANNEL_WEB     => ['name' => '电脑浏览器', 'field' => 'phone'],
+        self::CHANNEL_WXAPP   => ['name' => '微信小程序', 'field' => 'openid'],
+        self::CHANNEL_WECHAT  => ['name' => '微信服务号', 'field' => 'openid'],
+        self::CHANNEL_IOSAPP  => ['name' => '苹果APP应用', 'field' => 'phone'],
+        self::CHANNEL_ANDROID => ['name' => '安卓APP应用', 'field' => 'phone'],
     ];
 
     /**
-     * 创建用户账号实例
+     * 创建账号实例
      * @param string $type 通道类型
      * @param string $token 认证令牌
      * @return mixed|AccountInterface
