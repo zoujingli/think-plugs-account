@@ -26,16 +26,18 @@ interface AccountInterface
 {
     /**
      * 读取账号资料
+     * @param boolean $rejwt
      * @return array
      */
-    public function get(): array;
+    public function get(bool $rejwt = false): array;
 
     /**
      * 设置账号资料
      * @param array $data 用户资料
+     * @param boolean $rejwt
      * @return array
      */
-    public function set(array $data = []): array;
+    public function set(array $data = [], bool $rejwt = false): array;
 
     /**
      * 初始化账号通道
@@ -46,11 +48,10 @@ interface AccountInterface
 
     /**
      * 检查令牌是否有效
-     * @param string $token
      * @return array
      * @throws \think\admin\Exception
      */
-    public function check(string $token): array;
+    public function check(): array;
 
     /**
      * 生成新的用户令牌

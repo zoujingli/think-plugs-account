@@ -21,6 +21,7 @@ namespace plugin\account\service\contract;
 use plugin\account\model\PluginAccountAuth;
 use plugin\account\model\PluginAccountDevice;
 use think\admin\Exception;
+use think\admin\extend\JwtExtend;
 use think\App;
 
 /**
@@ -70,7 +71,7 @@ class AccountAccess implements AccountInterface
      * 测试专用TOKEN
      * @var string
      */
-    protected $testToken = 'tester';
+    protected $tester = 'tester';
 
     /**
      * 账号通道构造方法
@@ -105,20 +106,18 @@ class AccountAccess implements AccountInterface
 
     /**
      * 检查令牌是否有效
-     * @param string $token
      * @return array
      * @throws \think\admin\Exception
      */
-    public function check(string $token): array
+    public function check(): array
     {
         if ($this->device->isEmpty()) {
-            throw new Exception('登录认证无效，请重新登录！', 401);
+            throw new Exception('登录令牌无效，请重新登录！', 401);
         }
-        if ($token !== $this->testToken && $this->auther['token'] !== $token) {
-            throw new Exception('登录认证无效，请重新登录！', 401);
-        }
-        if ($this->expire > 0 && $this->auther['expire'] < time()) {
-            throw new Exception('登录认证超时，请重新登录！', 502);
+        if ($this->auther['token'] !== $this->tester) {
+            if ($this->expire > 0 && $this->auther['expire'] < time()) {
+                throw new Exception('登录认证超时，请重新登录！', 502);
+            }
         }
         return static::expire()->get();
     }
@@ -126,11 +125,12 @@ class AccountAccess implements AccountInterface
     /**
      * 更新用户用户参数
      * @param array $data 更新数据
+     * @param bool $rejwt 返回令牌
      * @return array
      * @throws \think\admin\Exception
      * @throws \think\db\exception\DbException
      */
-    public function set(array $data = []): array
+    public function set(array $data = [], bool $rejwt = false): array
     {
         $data['type'] = $this->type;
         // 如果传入授权验证字段
@@ -150,21 +150,22 @@ class AccountAccess implements AccountInterface
         if ($this->device->isEmpty()) {
             throw new Exception("更新用户资料失败！");
         } else {
-            return $this->token(intval($this->device['id']))->get();
+            return $this->token(intval($this->device['id']))->get($rejwt);
         }
     }
 
     /**
      * 获取用户数据
+     * @param bool $rejwt 返回令牌
      * @return array
      */
-    public function get(): array
+    public function get(bool $rejwt = false): array
     {
         $data = $this->device->toArray();
-        $data['auther'] = [
+        if ($rejwt) $data['jwtauth'] = JwtExtend::getToken([
             'type'  => $this->auther->getAttr('type'),
             'token' => $this->auther->getAttr('token'),
-        ];
+        ]);
         return $data;
     }
 
@@ -178,7 +179,7 @@ class AccountAccess implements AccountInterface
     {
         // 清理无效令牌
         PluginAccountAuth::mk()
-            ->where('token', '<>', $this->testToken)
+            ->where('token', '<>', $this->tester)
             ->whereBetween('expire', [1, time()])->delete();
 
         if ($this->auther->isEmpty()) {

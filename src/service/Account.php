@@ -73,12 +73,11 @@ abstract class Account
      */
     public static function mk(string $type, string $token = ''): AccountInterface
     {
-        if (isset(static::types[$type])) {
-            return app(AccountAccess::class, [
-                'type' => $type, 'field' => static::types[$type]['field'] ?? 'id'
-            ])->init($token);
+        if (isset(static::types[$type]) && isset(static::types[$type]['field'])) {
+            $vars = ['type' => $type, 'field' => static::types[$type]['field']];
+            return app(AccountAccess::class, $vars)->init($token);
         } else {
-            throw new Exception("用户通道 [{$type}] 未定义");
+            throw new Exception("用户通道 [{$type}] 未定义或参数错误");
         }
     }
 }
