@@ -24,10 +24,10 @@ use think\admin\helper\QueryHelper;
 
 /**
  * 用户主账号管理
- * Class User
+ * Class Master
  * @package plugin\account\controller\user
  */
-class Admin extends Controller
+class Master extends Controller
 {
     /**
      * 用户主账号管理

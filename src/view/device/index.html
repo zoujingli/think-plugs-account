@@ -3,23 +3,23 @@
 {block name="content"}
 <div class="layui-tab layui-tab-card">
     <ul class="layui-tab-title">
-        {foreach ['index'=>'用户管理','recycle'=>'回 收 站'] as $k=>$v}{if isset($type) and $type eq $k}
+        {foreach ['index'=>'账号管理','recycle'=>'回 收 站'] as $k=>$v}{if isset($type) and $type eq $k}
         <li data-open="{:url('index')}?type={$k}" class="layui-this">{$v}</li>
         {else}
         <li data-open="{:url('index')}?type={$k}">{$v}</li>
         {/if}{/foreach}
     </ul>
     <div class="layui-tab-content">
-        {include file='admin/index_search'}
-        <table id="UserTable" data-url="{:sysuri('index')}" data-target-search="form.form-search"></table>
+        {include file='device/index_search'}
+        <table id="DeviceTable" data-url="{:request()->url()}" data-target-search="form.form-search"></table>
     </div>
 </div>
 
 <script>
     $(function () {
-        $('#UserTable').layTable({
+        $('#DeviceTable').layTable({
             even: true, height: 'full',
-            sort: {field: 'sort desc,id', type: 'desc'},
+            sort: {field: 'id', type: 'desc'},
             where: {type: '{$type|default="index"}'},
             cols: [[
                 {checkbox: true, fixed: true},
@@ -54,9 +54,9 @@
             var data = {id: obj.value, status: obj.elem.checked > 0 ? 1 : 0};
             $.form.load("{:url('state')}", data, 'post', function (ret) {
                 if (ret.code < 1) $.msg.error(ret.info, 3, function () {
-                    $('#UserTable').trigger('reload');
+                    $('#DeviceTable').trigger('reload');
                 }); else {
-                    $('#UserTable').trigger('reload')
+                    $('#DeviceTable').trigger('reload')
                 }
                 return false;
             }, false);
