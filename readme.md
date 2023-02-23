@@ -8,6 +8,3 @@
 
 **ThinkPlugsAccount** 为 **ThinkAdmin** 会员插件，未授权不可商用，了解商用授权请阅读 [《会员尊享介绍》](https://thinkadmin.top/vip-introduce)。
 
-### 插件展示
-
-<img alt="WechatServiceDemo" src="https://thinkadmin.top/static/img/wechat-service-01.jpg" style="max-width:100%">
