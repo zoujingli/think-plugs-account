@@ -19,6 +19,7 @@ declare (strict_types=1);
 namespace plugin\account\controller;
 
 use plugin\account\model\PluginAccountBind;
+use plugin\account\service\Account;
 use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 
@@ -45,6 +46,45 @@ class Device extends Controller
         }, function (QueryHelper $query) {
             $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
         });
+    }
+
+    /**
+     * 数据列表处理
+     * @param array $data
+     * @return void
+     */
+    protected function _page_filter(array &$data)
+    {
+        $types = Account::getTypes();
+        foreach ($data as &$vo) {
+            $vo['type_name'] = $types[$vo['type']]['name'] ?? $vo['type'];
+        }
+    }
+
+    /**
+     * 配置终端通道
+     * @auth true
+     * @return void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function types()
+    {
+        $this->types = Account::getTypes();
+        if ($this->request->isGet()) {
+            $this->fetch();
+        } else {
+            $types = $this->request->post('types', []);
+            foreach ($this->types as $k => $v) {
+                Account::setStatus($k, intval(in_array($k, $types)));
+            }
+            if (Account::saveStatus()) {
+                $this->success('配置保存成功！');
+            } else {
+                $this->error('配置保存失败！');
+            }
+        }
     }
 
     /**

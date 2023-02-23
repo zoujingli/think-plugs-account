@@ -39,13 +39,13 @@ class Wechat extends Controller
      * 通道认证类型
      * @var string
      */
-    const type = Account::CHANNEL_WECHAT;
+    const type = Account::_WECHAT;
 
     /**
      * 唯一绑定字段
      * @var string
      */
-    private $afield;
+    private $field;
 
     /**
      * 微信调度器
@@ -65,12 +65,11 @@ class Wechat extends Controller
      */
     protected function initialize(): Wechat
     {
-        if (empty(Account::types[static::type]['field'])) {
-            $this->error(sprintf('接口通道 [%s] 未定义！', static::type));
-        } else {
+        if ($this->field = Account::getField(static::type)) {
             $this->wechat = WechatService::instance();
-            $this->afield = Account::types[static::type]['field'];
             $this->target = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
+        } else {
+            $this->error(sprintf('接口通道 [%s] 未开通！', static::type));
         }
         return $this;
     }
@@ -108,7 +107,7 @@ class Wechat extends Controller
         } else {
             $fans = $result['fansinfo'] ?? [];
             // 筛选保存数据
-            $data = [$this->afield => $result['openid'], 'extra' => $fans];
+            $data = [$this->field => $result['openid'], 'extra' => $fans];
             if (isset($fans['unionid'])) $data['unionid'] = $fans['unionid'];
             if (isset($fans['nickname'])) $data['nickname'] = $fans['nickname'];
             if (isset($fans['headimgurl'])) $data['headimg'] = $fans['headimgurl'];

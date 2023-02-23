@@ -36,13 +36,13 @@ class Wxapp extends Controller
      * 接口通道类型
      * @var string
      */
-    const type = Account::CHANNEL_WXAPP;
+    const type = Account::_WXAPP;
 
     /**
      * 唯一绑定字段
      * @var string
      */
-    private $afield;
+    private $field;
 
     /**
      * 小程序配置参数
@@ -64,10 +64,8 @@ class Wxapp extends Controller
             'appsecret'  => $opt['appkey'] ?? '',
             'cache_path' => syspath('runtime/wechat'),
         ];
-        if (empty(Account::types[$this->type]['field'])) {
-            $this->error(sprintf('接口通道 [%s] 未定义！', static::type));
-        } else {
-            $this->afield = Account::types[$this->type]['field'];
+        if (!($this->field = Account::getField($this->type))) {
+            $this->error(sprintf('接口通道 [%s] 未开通！', static::type));
         }
     }
 
@@ -79,7 +77,7 @@ class Wxapp extends Controller
         try {
             $input = $this->_vali(['code.require' => '凭证编码不能为空！']);
             [$openid, $unionid, $sesskey] = $this->applySesskey($input['code']);
-            $data = [$this->afield => $openid, 'session_key' => $sesskey];
+            $data = [$this->field => $openid, 'session_key' => $sesskey];
             if (!empty($unionid)) $data['unionid'] = $unionid;
             $this->success('授权换取成功！', Account::mk(static::type)->set($data, true));
         } catch (HttpResponseException $exception) {
@@ -104,7 +102,7 @@ class Wxapp extends Controller
             [$openid, $unionid, $input['session_key']] = $this->applySesskey($input['code']);
             $result = Crypt::instance($this->params)->decode($input['iv'], $input['session_key'], $input['encrypted']);
             if (is_array($result) && isset($result['avatarUrl']) && isset($result['nickName'])) {
-                $data = [$this->afield => $openid, 'nickname' => $result['nickName'], 'headimg' => $result['avatarUrl']];
+                $data = [$this->field => $openid, 'nickname' => $result['nickName'], 'headimg' => $result['avatarUrl']];
                 if (!empty($unionid)) $data['unionid'] = $unionid;
                 $this->success('数据解密成功！', Account::mk(static::type)->set($data, true));
             } elseif (is_array($result)) {

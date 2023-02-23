@@ -1,50 +1,18 @@
 <form action="{:sysuri()}" autocomplete="off" class="layui-form layui-form-pane form-search" method="get" onsubmit="return false">
 
     <div class="layui-form-item layui-inline">
-        <label class="layui-form-label">会员用户</label>
+        <label class="layui-form-label">用户手机</label>
         <label class="layui-input-inline">
-            <input class="layui-input" name="username" placeholder="请输入手机或昵称" value="{$get.username|default=''}">
+            <input class="layui-input" name="phone" placeholder="请输入用户手机" value="{$get.phone|default=''}">
         </label>
     </div>
 
-    <!--{notempty name='upgrades'}-->
     <div class="layui-form-item layui-inline">
-        <label class="layui-form-label">用户等级</label>
-        <div class="layui-input-inline">
-            <select class="layui-select" name="vip_code">
-                <option value="">-- 全部 --</option>
-                {foreach $upgrades as $upgrade}{if input('vip_code') eq $upgrade.number.''}
-                <option selected value="{$upgrade.number|default=0}">[ VIP{$upgrade.number|default='0'} ] {$upgrade.name|default=''}</option>
-                {else}
-                <option value="{$upgrade.number|default=0}">[ VIP{$upgrade.number|default='0'} ] {$upgrade.name|default=''}</option>
-                {/if}{/foreach}
-            </select>
-        </div>
-    </div>
-    <!--{/notempty}-->
-
-    <div class="layui-form-item layui-inline">
-        <label class="layui-form-label">代理用户</label>
+        <label class="layui-form-label">用户姓名</label>
         <label class="layui-input-inline">
-            <input class="layui-input" name="from_keys" placeholder="请输入手机或昵称" value="{$get.from_keys|default=''}">
+            <input class="layui-input" name="username" placeholder="请输入用户姓名" value="{$get.username|default=''}">
         </label>
     </div>
-
-    <!--{notempty name='upgrades'}-->
-    <div class="layui-form-item layui-inline">
-        <label class="layui-form-label">代理等级</label>
-        <div class="layui-input-inline">
-            <select class="layui-select" name="from_vipcode">
-                <option value="">-- 全部 --</option>
-                {foreach $upgrades as $upgrade}{if input('from_vipcode') eq $upgrade.number.''}
-                <option selected value="{$upgrade.number|default=0}">[ VIP{$upgrade.number|default='0'} ] {$upgrade.name|default=''}</option>
-                {else}
-                <option value="{$upgrade.number|default=0}">[ VIP{$upgrade.number|default='0'} ] {$upgrade.name|default=''}</option>
-                {/if}{/foreach}
-            </select>
-        </div>
-    </div>
-    <!--{/notempty}-->
 
     <div class="layui-form-item layui-inline">
         <label class="layui-form-label">使用状态</label>
@@ -62,9 +30,9 @@
     </div>
 
     <div class="layui-form-item layui-inline">
-        <label class="layui-form-label">注册时间</label>
+        <label class="layui-form-label">绑定时间</label>
         <div class="layui-input-inline">
-            <input class="layui-input" data-date-range name="create_at" placeholder="请选择注册时间" value="{$get.create_at|default=''}">
+            <input class="layui-input" data-date-range name="create_at" placeholder="请选择绑定时间" value="{$get.create_at|default=''}">
         </div>
     </div>
 
@@ -84,23 +52,17 @@
             data.forEach(function (item, index) {
                 data[index] = [
                     {v: item.id, t: 'n'},
-                    item.openid1 || '-',
-                    item.openid2 || '-',
-                    item.username || item.nickname || '',
-                    item.vip_name || '-',
-                    {v: item.balance_total || '0.00', t: 'n'},
-                    {v: item.balance_used || '0.00', t: 'n'},
-                    {v: item.rebate_total || '0.00', t: 'n'},
-                    {v: item.rebate_lock || '0.00', t: 'n'},
-                    {v: item.rebate_used || '0.00', t: 'n'},
-                    item.create_at || '',
+                    item.username || '-',
+                    item.nickname || '-',
+                    item.phone || '-',
+                    item.create_time || '',
                 ];
             });
 
             // 设置表头内容
-            data.unshift(['ID', '小程序', '公众号', '用户姓名', '用户等级', '累计充值余额', '已使用余额', '累计返利金额', '锁定返利金额', '已提现金额', '注册时间']);
+            data.unshift(['ID', '用户姓名', '用户昵称', '绑定手机', '创建时间']);
 
-            // 自动计算列序号
+            // 自动计算列序
             var lastCol = layui.excel.numToTitle((function (count, idx) {
                 for (idx in data[0]) count++;
                 return count;
@@ -116,20 +78,21 @@
             });
 
             // 设置内容样式
-            var style1 = {
+            (function (style1, style2) {
+                layui.excel.setExportCellStyle(data, 'A2:' + lastCol + data.length, {s: style1}, function (rawCell, newCell, row, config, curRow) {
+                    /* 判断并转换单元格数据为对象，以便初始化样式 */
+                    typeof rawCell !== 'object' && (rawCell = {v: rawCell});
+                    rawCell.s = Object.assign({}, style2, rawCell.s || {});
+                    return (curRow % 2 === 0) ? newCell : rawCell;
+                });
+            })({
                 font: {sz: 10, shadow: true, name: '微软雅黑'},
                 fill: {bgColor: {indexed: 64}, fgColor: {rgb: "EAEAEA"}},
                 alignment: {vertical: 'center', horizontal: 'center'}
-            }, style2 = {
+            }, {
                 font: {sz: 10, shadow: true, name: '微软雅黑'},
                 fill: {bgColor: {indexed: 64}, fgColor: {rgb: "FFFFFF"}},
                 alignment: {vertical: 'center', horizontal: 'center'}
-            };
-            layui.excel.setExportCellStyle(data, 'A2:' + lastCol + data.length, {s: style1}, function (rawCell, newCell, row, config, curRow) {
-                /* 判断并转换单元格数据为对象，以便初始化样式 */
-                typeof rawCell !== 'object' && (rawCell = {v: rawCell});
-                rawCell.s = Object.assign({}, style2, rawCell.s || {});
-                return (curRow % 2 === 0) ? newCell : rawCell;
             });
 
             // 设置表格行宽高，需要设置最后的行或列宽高，否则部分不生效 ？？？
@@ -141,6 +104,6 @@
             };
 
             return data;
-        }, '会员用户数据');
+        }, '用户账号数据' + layui.util.toDateString(Date.now(), '_yyyyMMdd_HHmmss'));
     });
 </script>

@@ -40,9 +40,8 @@ class Login extends Controller
     {
         // 接收接口类型
         $this->type = $this->request->header('api-name');
-        $this->type = $this->request->header('api-type');
-        if (empty(Account::types[$this->type])) {
-            $this->error("接口支付[{$this->type}]未定义规则！");
+        if (!($this->field = Account::getField($this->type))) {
+            $this->error(sprintf('接口通道 [%s] 未开通！', $this->type));
         }
     }
 
