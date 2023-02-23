@@ -44,6 +44,7 @@ class Master extends Controller
         PluginAccountUser::mQuery()->layTable(function () {
             $this->title = '用户主账号管理';
         }, function (QueryHelper $query) {
+            $query->like('phone,username,nickname')->dateBetween('create_time');
             $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
         });
     }
