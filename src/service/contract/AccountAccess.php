@@ -231,7 +231,7 @@ class AccountAccess implements AccountInterface
     public function token(int $unid): AccountInterface
     {
         // 清理无效令牌
-        PluginAccountAuth::mk()->where('token', '<>', $this->tester)->whereBetween('expire', [1, time()])->delete();
+        PluginAccountAuth::mk()->where('token', '<>', $this->tester)->whereBetween('time', [1, time()])->delete();
 
         // 刷新登录令牌
         if ($this->auth->isEmpty()) {
@@ -255,9 +255,9 @@ class AccountAccess implements AccountInterface
      */
     public function expire(): AccountInterface
     {
-        $expire = $this->expire > 0 ? $this->expire + time() : 0;
+        $time = $this->expire > 0 ? $this->expire + time() : 0;
         $this->auth->isExists() && $this->auth->save([
-            'type' => $this->type, 'expire' => $expire
+            'type' => $this->type, 'time' => $time
         ]);
         return $this;
     }
