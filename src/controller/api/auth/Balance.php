@@ -35,8 +35,8 @@ class Balance extends Auth
     public function get()
     {
         PluginAccountUserBalance::mQuery(null, function (QueryHelper $query) {
-            $query->withoutField('deleted,create_by');
-            $query->where(['unid' => $this->unid, 'deleted' => 0])->like('create_time#date');
+            $query->whereRaw("(unid=0 and usid={$this->usid}) or (unid>0 and unid={$this->unid})");
+            $query->withoutField('deleted,create_by')->where(['deleted' => 0])->like('create_time#date');
             $this->success('获取数据成功！', $query->order('id desc')->page(true, false, false, 10));
         });
     }
