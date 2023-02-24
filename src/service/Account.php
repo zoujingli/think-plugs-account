@@ -106,7 +106,7 @@ abstract class Account
     public static function setStatus(string $code, int $status): bool
     {
         if (isset(self::$types[$code])) {
-            self::$types[$code]['status'] = $status;
+            self::$types[$code]['status'] = intval(!!$status);
             return true;
         } else {
             return false;

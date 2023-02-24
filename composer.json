@@ -14,7 +14,8 @@
     "php": ">=7.1",
     "ext-json": "*",
     "zoujingli/think-install": "^1.0|dev-master",
-    "zoujingli/wechat-developer": "^1.0"
+    "zoujingli/think-library": "^6.1|v6.0.x-dev",
+    "zoujingli/wechat-developer": "^1.0|dev-master"
   },
   "autoload": {
     "psr-4": {
