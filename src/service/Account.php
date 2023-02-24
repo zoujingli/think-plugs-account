@@ -49,18 +49,18 @@ abstract class Account
 
     /**
      * 创建账号实例
-     * @param string $code 通道编号
+     * @param string $type 通道编号
      * @param string $token 认证令牌
      * @return mixed|AccountInterface
      * @throws \think\admin\Exception
      */
-    public static function mk(string $code, string $token = ''): AccountInterface
+    public static function mk(string $type, string $token = ''): AccountInterface
     {
-        if (self::getField($code)) {
-            $vars = ['type' => $code, 'field' => self::$types[$code]['field']];
+        if (self::getField($type)) {
+            $vars = ['type' => $type, 'field' => self::$types[$type]['field']];
             return app(AccountAccess::class, $vars)->init($token);
         } else {
-            throw new Exception("用户通道 [{$code}] 未定义或参数错误");
+            throw new Exception("用户通道 [{$type}] 未定义或参数错误");
         }
     }
 
@@ -98,14 +98,14 @@ abstract class Account
 
     /**
      * 获取通道认证字段
-     * @param string $code
+     * @param string $type 通道编码
      * @return string
      */
-    public static function getField(string $code): string
+    public static function getField(string $type): string
     {
         self::$initd || self::getTypes();
-        if (!empty(self::$types[$code]['status'])) {
-            return self::$types[$code]['field'] ?? '';
+        if (!empty(self::$types[$type]['status'])) {
+            return self::$types[$type]['field'] ?? '';
         } else {
             return '';
         }
@@ -113,14 +113,14 @@ abstract class Account
 
     /**
      * 设置通道状态
-     * @param string $code 通道编号
+     * @param string $type 通道编号
      * @param integer $status 通道状态
      * @return bool
      */
-    public static function setStatus(string $code, int $status): bool
+    public static function setStatus(string $type, int $status): bool
     {
-        if (isset(self::$types[$code])) {
-            self::$types[$code]['status'] = intval(!!$status);
+        if (isset(self::$types[$type])) {
+            self::$types[$type]['status'] = intval(!!$status);
             return true;
         } else {
             return false;

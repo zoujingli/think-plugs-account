@@ -1,28 +1,36 @@
-# ThinkPlugsAccount for ThinkAdmin [`VIP`](https://thinkadmin.top/vip-introduce)
+# ThinkPlugsAccount for ThinkAdmin
 
 [![Latest Stable Version](https://poser.pugx.org/zoujingli/think-plugs-account/v/stable)](https://packagist.org/packages/zoujingli/think-plugs-account)
 [![Latest Unstable Version](https://poser.pugx.org/zoujingli/think-plugs-account/v/unstable)](https://packagist.org/packages/zoujingli/think-plugs-account)
 [![Total Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/downloads)](https://packagist.org/packages/zoujingli/think-plugs-account)
 [![Monthly Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/d/monthly)](https://packagist.org/packages/zoujingli/think-plugs-account)
 [![Daily Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/d/daily)](https://packagist.org/packages/zoujingli/think-plugs-account)
+[![PHP Version Require](http://poser.pugx.org/zoujingli/think-plugs-account/require/php)](https://packagist.org/packages/zoujingli/think-plugs-account)
+[![ThinkAdmin VIP 授权](https://img.shields.io/badge/license-VIP%20授权-blueviolet.svg)](https://thinkadmin.top/vip-introduce)
 
-用户账号中心，此插件为[会员尊享插件](https://thinkadmin.top/vip-introduce)，未授权不可商用。
+**插件正在开发测试中，不建议使用 ！！！**
 
-通用基础账号管理插件，目前数据接口已支持 **微信服务号** 和 **微信小程序** 两种登录授权方式，其他账号登录方式稍后等短信验证插件上线再开放。
-账号数据通道已支持 **微信服务号**、**微信小程序**、**安卓App程序**、**苹果IOS程序**、**手机网页端**、**电脑网页端** 以及 **自定义通道**。
+用户账号管理插件，此插件为[会员尊享插件](https://thinkadmin.top/vip-introduce)，未授权不可商用。
 
-插件中主要涉及两个ID字段，分别是 `usid` 和 `unid`。
+此插件目前数据接口已支持 **微信服务号** 和 **微信小程序** 两种登录授权，其他登录方式需要等短信验证插件上线再开放。
+账号服务层数据已支持 **微信服务号**、**微信小程序**、**安卓APP程序**、**苹果IOS程序**、**手机网页端**、**电脑网页端** 以及 **自定义方式**。
 
-* `usid` 表示当前登录终端设置的用户信息，也可视为子账号
-* `unid` 表示由`usid`登录后，绑定用户资料形成的唯一用户账号，即主账号。
+目前账号体系尚处在测试阶段，在未清楚其工作原理时建议不要直接使用！
 
-由 `usid` 登录后，调用 `$acction->bind()` 方法可以快速生成或绑定主账号。
-子账号取消关联主账号，调用 `$action->unbind()` 即可，之后子账号又可以绑定其他主账号。
-目前账号体系尚处在测试阶段，建议不要直接使用！
+### 话术解析
+
+1. 账号调度器 **Account**，用于创建账号实例对象，处理部分基础数据；
+2. 账号接口类型 **Account::IOSAPP**，子账号及请求接口的绑定标识，通常以字段 **type** 传参数；
+3. 账号实例对象 **AccountInterface**，包含用户主账号、子账号的数据及对应的操作，包含接口授权等操作；
+4. 主账号编号 **unid**，对应数据表 **PlugsUser** 的 **id** 字段，用户的唯一账号，通过绑定与解绑来关联子账号；
+5. 子账号编号 **usid**，对应数据表 **PlugsBind** 的 **id** 字段，用户的其中一种登录账号，同时只能绑定一个主账号；
+
+**注意：** 主账号 `unid` 是由子账号 `usid` 登录后，调用 `$action->bind()` 创建或绑定主账号，进而获取主账号 `unid` 值。
+子账号取消关联主账号，调用 `$action->unbind()` 即可，随后子账号又可以绑定其他主账号。
 
 ### 开放接口
 
-请阅读《用户账号中心》文档
+整理中...
 
 ### 安装插件
 
@@ -97,7 +105,7 @@ var_dump($types);
 本插件涉及数据表有：
 
 * 插件-账号-授权 `plugin_account_auth`
-* 插件-账号-设备 `plugin_account_bind`
+* 插件-账号-终端 `plugin_account_bind`
 * 插件-账号-资料 `plugin_account_user`
 * 插件-账号-地址 `plugin_account_user_address`
 * 插件-账号-余额 `plugin_account_user_balance`
