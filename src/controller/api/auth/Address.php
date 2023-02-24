@@ -20,7 +20,6 @@ namespace plugin\account\controller\api\auth;
 
 use plugin\account\controller\api\Auth;
 use plugin\account\model\PluginAccountUserAddress;
-use think\admin\helper\QueryHelper;
 
 /**
  * 用户收货地址管理
@@ -30,89 +29,71 @@ use think\admin\helper\QueryHelper;
 class Address extends Auth
 {
     /**
-     * 添加或修改收货地址
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
+     * 修改收货地址
      */
     public function set()
     {
         $data = $this->_vali([
             'id.default'          => 0,
-            'umid.value'          => $this->umid,
             'unid.value'          => $this->unid,
+            'usid.value'          => $this->usid,
             'type.default'        => 0,
             'idcode.default'      => '', // 身份证号码
             'idimg1.default'      => '', // 身份证正面
             'idimg2.default'      => '', // 身份证反面
-            'type.in:0,1'         => '地址状态不在范围！',
-            'name.require'        => '收货姓名不能为空！',
-            'phone.mobile'        => '收货手机格式错误！',
-            'phone.require'       => '收货手机不能为空！',
-            'region_prov.require' => '地址省份不能为空！',
-            'region_city.require' => '地址城市不能为空！',
-            'region_area.require' => '地址区域不能为空！',
-            'address.require'     => '详情地址不能为空！',
+            'type.in:0,1'         => '状态不在范围！',
+            'name.require'        => '姓名不能为空！',
+            'phone.mobile'        => '手机格式错误！',
+            'phone.require'       => '手机不能为空！',
+            'region_prov.require' => '省份不能为空！',
+            'region_city.require' => '城市不能为空！',
+            'region_area.require' => '区域不能为空！',
+            'region_addr.require' => '地址不能为空！',
         ]);
 
-        // 读取历史数据
-        $map = ['id' => $data['id'], 'umid' => $data['umid']];
-        $addr = PluginAccountUserAddress::mk()->where($map)->findOrEmpty();
+        // 设置默认值
+        $addr = $this->withDefault($data['id'], $data['type'], true);
 
-        // 去除其它默认选项
-        if (isset($data['type']) && $data['type'] > 0) {
-            $map = [['umid', '=', $this->umid], ['id', '<>', $data['id']]];
-            PluginAccountUserAddress::mk()->where($map)->update(['type' => 0]);
-        }
-
-        // 更新保存收货地址
+        // 保存收货地址
         if ($addr->save($data) && $addr->isExists()) {
-            $this->success('地址保存成功！', $addr->refresh()->toArray());
+            $this->success('保存成功！', $addr->refresh()->toArray());
         } else {
-            $this->error('地址保存失败！');
+            $this->error('保存失败！');
         }
     }
 
     /**
      * 获取收货地址
+     * @return void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
     public function get()
     {
-        PluginAccountUserAddress::mQuery(null, function (QueryHelper $query) {
-            $query->equal('id')->where(['umid' => $this->umid, 'deleted' => 0]);
-            $query->withoutField('deleted')->order('type desc,id desc');
-            $this->success('获取地址数据！', $query->page(false, false, false, 15));
-        });
+        $query = $this->_query($this->withModel());
+        $query->equal('id')->order('type desc,id desc');
+        $this->success('获取地址数据！', $query->page(false, false));
     }
 
     /**
      * 修改地址状态
      * @return void
-     * @throws \think\db\exception\DbException
      */
     public function state()
     {
         $data = $this->_vali([
-            'umid.value'   => $this->umid,
-            'id.require'   => '地址编号不能为空！',
-            'type.in:0,1'  => '地址状态不在范围！',
-            'type.require' => '地址状态不能为空！',
+            'id.require'   => '编号不能为空！',
+            'type.in:0,1'  => '状态不在范围！',
+            'type.require' => '状态不能为空！',
         ]);
 
-        // 检查地址是否存在
-        $map = ['id' => $data['id'], 'umid' => $data['umid']];
-        $addr = PluginAccountUserAddress::mk()->where($map)->findOrEmpty();
-        $addr->isEmpty() && $this->error('修改的地址不存在！');
+        // 检查是否存在
+        $addr = $this->withDefault($data['id'], $data['type']);
+        $addr->isEmpty() && $this->error('地址不存在！');
 
-        // 更新默认地址状态
-        $addr->save(['type' => $data['type']]);
-
-        // 去除其它默认选项
-        if ($data['type'] > 0) {
-            $map = [['umid', '=', $this->umid], ['id', '<>', $data['id']]];
-            PluginAccountUserAddress::mk()->where($map)->update(['type' => 0]);
-        }
-        $this->success('默认设置成功！', $addr->refresh()->toArray());
+        // 返回成功消息
+        $this->success('设置默认成功！', $addr->refresh()->toArray());
     }
 
     /**
@@ -120,15 +101,45 @@ class Address extends Auth
      */
     public function remove()
     {
-        $map = $this->_vali([
-            'id.require' => '地址不能为空！', 'umid.value' => $this->umid,
-        ]);
-        $item = PluginAccountUserAddress::mk()->where($map)->findOrEmpty();
-        if ($item->isEmpty()) $this->error('需要删除的地址不存在！');
-        if ($item->save(['deleted' => 1]) !== false) {
+        $map = $this->_vali(['id.require' => '地址ID不能为空！']);
+        $addr = $this->withModel($map)->findOrEmpty();
+        if ($addr->isEmpty()) {
+            $this->error('地址不存在！');
+        } elseif ($addr->save(['deleted' => 1]) !== false) {
             $this->success('删除地址成功！');
         } else {
             $this->error('删除地址失败！');
         }
+    }
+
+    /**
+     * 创建数据模型
+     * @param array $map
+     * @return \plugin\account\model\PluginAccountUserAddress
+     */
+    private function withModel(array $map = []): PluginAccountUserAddress
+    {
+        $raw = "(unid=0 and usid={$this->usid}) or (unid>0 and unid={$this->unid})";
+        $model = PluginAccountUserAddress::mk()->withoutField('deleted');
+        return $model->whereRaw($raw)->where($map)->where(['deleted' => 0]);
+    }
+
+    /**
+     * 取消默认选项
+     * @param integer $addid 地址编号
+     * @param integer $isdef 是否默认
+     * @param boolean $force 强制更新
+     * @return \plugin\account\model\PluginAccountUserAddress
+     */
+    private function withDefault(int $addid = 0, int $isdef = 1, bool $force = false): PluginAccountUserAddress
+    {
+        $addr = $this->withModel(['id' => $addid])->findOrEmpty();
+        if (intval($addr['type']) !== $isdef && $addr->isExists()) {
+            $addr->save(['type' => $isdef]);
+        }
+        if (($force || $addr->isExists()) && $isdef > 0) {
+            $this->withModel([['id', '<>', $addid]])->update(['type' => 0]);
+        }
+        return $addr;
     }
 }

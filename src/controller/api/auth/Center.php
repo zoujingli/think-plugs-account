@@ -14,6 +14,8 @@
 // | github 代码仓库：https://github.com/zoujingli/think-plugs-account
 // +----------------------------------------------------------------------
 
+declare (strict_types=1);
+
 namespace plugin\account\controller\api\auth;
 
 use plugin\account\controller\api\Auth;

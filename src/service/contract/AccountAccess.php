@@ -39,6 +39,18 @@ class AccountAccess implements AccountInterface
     protected $app;
 
     /**
+     * 当前认证令牌
+     * @var PluginAccountAuth
+     */
+    protected $auth;
+
+    /**
+     * 当前用户终端
+     * @var PluginAccountBind
+     */
+    protected $bind;
+
+    /**
      * 当前通道类型
      * @var string
      */
@@ -55,18 +67,6 @@ class AccountAccess implements AccountInterface
      * @var integer
      */
     protected $expire = 3600;
-
-    /**
-     * 当前认证令牌
-     * @var PluginAccountAuth
-     */
-    protected $auther;
-
-    /**
-     * 当前用户终端
-     * @var PluginAccountBind
-     */
-    protected $device;
 
     /**
      * 测试专用TOKEN
@@ -96,11 +96,11 @@ class AccountAccess implements AccountInterface
     {
         if (!empty($token)) {
             $map = ['type' => $this->type, 'token' => $token, 'deleted' => 0];
-            $this->auther = PluginAccountAuth::mk()->where($map)->findOrEmpty();
-            $this->device = $this->auther->device()->findOrEmpty();
+            $this->auth = PluginAccountAuth::mk()->where($map)->findOrEmpty();
+            $this->bind = $this->auth->device()->findOrEmpty();
         } else {
-            $this->auther = PluginAccountAuth::mk();
-            $this->device = PluginAccountBind::mk();
+            $this->auth = PluginAccountAuth::mk();
+            $this->bind = PluginAccountBind::mk();
         }
         return $this;
     }
@@ -118,22 +118,22 @@ class AccountAccess implements AccountInterface
         $data['type'] = $this->type;
         // 如果传入授权验证字段
         if (isset($data[$this->field]) && $data[$this->field]) {
-            if ($this->device->isExists()) {
-                if ($data[$this->field] !== $this->device[$this->field]) {
+            if ($this->bind->isExists()) {
+                if ($data[$this->field] !== $this->bind[$this->field]) {
                     throw new Exception('禁用替换用户禁用');
                 }
             } else {
                 $map = [$this->field => $data[$this->field]];
-                $this->device = PluginAccountBind::mk()->where($map)->findOrEmpty();
+                $this->bind = PluginAccountBind::mk()->where($map)->findOrEmpty();
             }
-        } elseif ($this->device->isEmpty()) {
+        } elseif ($this->bind->isEmpty()) {
             throw new Exception("必要字段 {$this->field} 不能为空！");
         }
-        $this->device = $this->save($data);
-        if ($this->device->isEmpty()) {
+        $this->bind = $this->save($data);
+        if ($this->bind->isEmpty()) {
             throw new Exception("更新用户资料失败！");
         } else {
-            return $this->token(intval($this->device['id']))->get($rejwt);
+            return $this->token(intval($this->bind['id']))->get($rejwt);
         }
     }
 
@@ -144,12 +144,12 @@ class AccountAccess implements AccountInterface
      */
     public function get(bool $rejwt = false): array
     {
-        $data = $this->device->hidden(['password'])->toArray();
-        if ($this->device->isExists()) {
-            $data['user'] = $this->device->user()->findOrEmpty()->toArray();
+        $data = $this->bind->hidden(['password'])->toArray();
+        if ($this->bind->isExists()) {
+            $data['user'] = $this->bind->user()->findOrEmpty()->toArray();
             if ($rejwt) $data['token'] = JwtExtend::getToken([
-                'type'  => $this->auther->getAttr('type'),
-                'token' => $this->auther->getAttr('token'),
+                'type'  => $this->auth->getAttr('type'),
+                'token' => $this->auth->getAttr('token'),
             ]);
         }
         return $data;
@@ -164,11 +164,9 @@ class AccountAccess implements AccountInterface
      */
     public function bind(array $map, array $data = []): array
     {
-        if ($this->device->isEmpty()) {
-            throw new Exception('终端用户不存在！');
-        }
+        if ($this->bind->isEmpty()) throw new Exception('终端用户不存在！');
         $user = PluginAccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
-        if ($this->device['umid'] > 0 && ($user->isEmpty() || $this->device['umid'] !== $user['id'])) {
+        if ($this->bind['unid'] > 0 && ($user->isEmpty() || $this->bind['unid'] !== $user['id'])) {
             throw new Exception("已绑定其他用户！");
         }
         if (!empty($data['extra'])) {
@@ -177,7 +175,10 @@ class AccountAccess implements AccountInterface
             unset($data['extra']);
         }
         if ($user->save($data + $map) && $user->isExists()) {
-            $this->device->save(['umid' => $user['id']]);
+            $this->bind->save(['unid' => $user['id']]);
+            $this->app->event->trigger('ThinkPlugsAccountBind', [
+                'unid' => intval($user['id']), 'usid' => intval($this->bind['id']),
+            ]);
             return $this->get();
         } else {
             throw new Exception('绑定用户失败！');
@@ -191,10 +192,15 @@ class AccountAccess implements AccountInterface
      */
     public function unbind(): array
     {
-        if ($this->device->isEmpty()) {
-            throw new Exception('终端资料不存在！');
+        if ($this->bind->isEmpty()) {
+            throw new Exception('终端账号不存在！');
         }
-        $this->device->save(['umid' => 0]);
+        if (($unid = $this->bind['unid']) > 0) {
+            $this->bind->save(['unid' => 0]);
+            $this->app->event->trigger('ThinkPlugsAccountUnbind', [
+                'unid' => $unid, 'usid' => $this->bind['id'],
+            ]);
+        }
         return $this->get();
     }
 
@@ -205,11 +211,11 @@ class AccountAccess implements AccountInterface
      */
     public function check(): array
     {
-        if ($this->device->isEmpty()) {
+        if ($this->bind->isEmpty()) {
             throw new Exception('登录令牌无效，请重新登录！', 401);
         }
-        if ($this->auther['token'] !== $this->tester) {
-            if ($this->expire > 0 && $this->auther['expire'] < time()) {
+        if ($this->auth['token'] !== $this->tester) {
+            if ($this->expire > 0 && $this->auth['expire'] < time()) {
                 throw new Exception('登录认证超时，请重新登录！', 502);
             }
         }
@@ -228,15 +234,15 @@ class AccountAccess implements AccountInterface
         PluginAccountAuth::mk()->where('token', '<>', $this->tester)->whereBetween('expire', [1, time()])->delete();
 
         // 刷新登录令牌
-        if ($this->auther->isEmpty()) {
-            $this->auther = PluginAccountAuth::mk()->where(['unid' => $unid])->findOrEmpty();
+        if ($this->auth->isEmpty()) {
+            $this->auth = PluginAccountAuth::mk()->where(['usid' => $unid])->findOrEmpty();
         }
 
         // 生成新令牌数据
-        if ($this->auther->isEmpty()) {
+        if ($this->auth->isEmpty()) {
             do $data = ['type' => $this->type, 'token' => md5(uniqid(strval(rand(0, 999))))];
             while (PluginAccountAuth::mk()->where($data)->findOrEmpty()->isExists());
-            $this->auther->save($data + ['unid' => $unid]);
+            $this->auth->save($data + ['usid' => $unid]);
         } else {
             $this->expire();
         }
@@ -250,7 +256,7 @@ class AccountAccess implements AccountInterface
     public function expire(): AccountInterface
     {
         $expire = $this->expire > 0 ? $this->expire + time() : 0;
-        $this->auther->isExists() && $this->auther->save([
+        $this->auth->isExists() && $this->auth->save([
             'type' => $this->type, 'expire' => $expire
         ]);
         return $this;
@@ -268,12 +274,12 @@ class AccountAccess implements AccountInterface
             throw new Exception('用户数据不能为空！');
         }
         if (!empty($data['extra'])) {
-            $extra = $this->device->getAttr('extra');
-            $this->device->setAttr('extra', $extra + $data['extra']);
+            $extra = $this->bind->getAttr('extra');
+            $this->bind->setAttr('extra', $extra + $data['extra']);
             unset($data['extra']);
         }
-        if ($this->device->save($data) && $this->device->isExists()) {
-            return $this->device->refresh();
+        if ($this->bind->save($data) && $this->bind->isExists()) {
+            return $this->bind->refresh();
         } else {
             throw new Exception('用户数据保存失败！');
         }

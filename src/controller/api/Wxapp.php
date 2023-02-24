@@ -14,6 +14,8 @@
 // | github 代码仓库：https://github.com/zoujingli/think-plugs-account
 // +----------------------------------------------------------------------
 
+declare (strict_types=1);
+
 namespace plugin\account\controller\api;
 
 use Exception;
@@ -36,7 +38,7 @@ class Wxapp extends Controller
      * 接口通道类型
      * @var string
      */
-    const type = Account::_WXAPP;
+    const type = Account::WXAPP;
 
     /**
      * 唯一绑定字段

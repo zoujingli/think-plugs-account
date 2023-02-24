@@ -14,6 +14,8 @@
 // | github 代码仓库：https://github.com/zoujingli/think-plugs-account
 // +----------------------------------------------------------------------
 
+declare (strict_types=1);
+
 namespace plugin\account\controller\api;
 
 use app\wechat\service\WechatService;
@@ -39,7 +41,7 @@ class Wechat extends Controller
      * 通道认证类型
      * @var string
      */
-    const type = Account::_WECHAT;
+    const type = Account::WECHAT;
 
     /**
      * 唯一绑定字段

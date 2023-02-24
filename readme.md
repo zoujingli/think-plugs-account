@@ -39,7 +39,7 @@ use plugin\account\service\Account;
 //   不传 TOKEN 的情况下并存在 openid 时会主动通过 openid 查询用户信息
 //   如果传 TOKEN 的情况下且 opneid 与原 openid 不匹配会报错，用 try 捕获异常
 //   注意，每次调用 Account::mk() 都会创建新的调度器，设置 set 和 get 方法的 rejwt 参数可返回接口令牌 
-$account = Account::mk(Account::_WXAPP, TOKEN='');
+$account = Account::mk(Account::WXAPP, TOKEN='');
 $user = $account->set(['openid'=>"OPENID", 'phone'=>'13888888888']);
 var_dump($user);
 

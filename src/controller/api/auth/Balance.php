@@ -14,6 +14,8 @@
 // | github 代码仓库：https://github.com/zoujingli/think-plugs-account
 // +----------------------------------------------------------------------
 
+declare (strict_types=1);
+
 namespace plugin\account\controller\api\auth;
 
 use plugin\account\controller\api\Auth;
@@ -34,7 +36,7 @@ class Balance extends Auth
     {
         PluginAccountUserBalance::mQuery(null, function (QueryHelper $query) {
             $query->withoutField('deleted,create_by');
-            $query->where(['umid' => $this->umid, 'deleted' => 0])->like('create_time#date');
+            $query->where(['unid' => $this->unid, 'deleted' => 0])->like('create_time#date');
             $this->success('获取数据成功！', $query->order('id desc')->page(true, false, false, 10));
         });
     }

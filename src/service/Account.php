@@ -29,23 +29,22 @@ use think\admin\Exception;
  */
 abstract class Account
 {
-    const _WAP = 'wap';
-    const _WEB = 'web';
-    const _WXAPP = 'wxapp';
-    const _WECHAT = 'wechat';
-    const _IOSAPP = 'iosapp';
-    const _ANDROID = 'android';
+    const WAP = 'wap';
+    const WEB = 'web';
+    const WXAPP = 'wxapp';
+    const WECHAT = 'wechat';
+    const IOSAPP = 'iosapp';
+    const ANDROID = 'android';
 
     private static $initd = false;
 
     private static $types = [
-        // 接口支付配置（不需要的直接注释）
-        self::_WAP     => ['name' => '手机浏览器', 'field' => 'phone', 'status' => 1],
-        self::_WEB     => ['name' => '电脑浏览器', 'field' => 'phone', 'status' => 1],
-        self::_WXAPP   => ['name' => '微信小程序', 'field' => 'openid', 'status' => 1],
-        self::_WECHAT  => ['name' => '微信服务号', 'field' => 'openid', 'status' => 1],
-        self::_IOSAPP  => ['name' => '苹果APP应用', 'field' => 'phone', 'status' => 1],
-        self::_ANDROID => ['name' => '安卓APP应用', 'field' => 'phone', 'status' => 1],
+        self::WAP     => ['name' => '手机浏览器', 'field' => 'phone', 'status' => 1],
+        self::WEB     => ['name' => '电脑浏览器', 'field' => 'phone', 'status' => 1],
+        self::WXAPP   => ['name' => '微信小程序', 'field' => 'openid', 'status' => 1],
+        self::WECHAT  => ['name' => '微信服务号', 'field' => 'openid', 'status' => 1],
+        self::IOSAPP  => ['name' => '苹果APP应用', 'field' => 'phone', 'status' => 1],
+        self::ANDROID => ['name' => '安卓APP应用', 'field' => 'phone', 'status' => 1],
     ];
 
     /**
@@ -98,6 +97,21 @@ abstract class Account
     }
 
     /**
+     * 获取通道认证字段
+     * @param string $code
+     * @return string
+     */
+    public static function getField(string $code): string
+    {
+        self::$initd || self::getTypes();
+        if (!empty(self::$types[$code]['status'])) {
+            return self::$types[$code]['field'] ?? '';
+        } else {
+            return '';
+        }
+    }
+
+    /**
      * 设置通道状态
      * @param string $code 通道编号
      * @param integer $status 通道状态
@@ -110,21 +124,6 @@ abstract class Account
             return true;
         } else {
             return false;
-        }
-    }
-
-    /**
-     * 获取通道认证字段
-     * @param string $code
-     * @return string
-     */
-    public static function getField(string $code): string
-    {
-        self::$initd || self::getTypes();
-        if (!empty(self::$types[$code]['status'])) {
-            return self::$types[$code]['field'] ?? '';
-        } else {
-            return '';
         }
     }
 

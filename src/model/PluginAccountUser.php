@@ -35,7 +35,7 @@ class PluginAccountUser extends Model
      */
     public function binds(): HasMany
     {
-        return $this->hasMany(PluginAccountBind::class, 'umid', 'id');
+        return $this->hasMany(PluginAccountBind::class, 'unid', 'id');
     }
 
     /**

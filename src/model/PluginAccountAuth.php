@@ -34,7 +34,7 @@ class PluginAccountAuth extends Model
      */
     public function device(): HasOne
     {
-        return $this->hasOne(PluginAccountBind::class, 'id', 'unid')->with(['user']);
+        return $this->hasOne(PluginAccountBind::class, 'id', 'usid')->with(['user']);
     }
 
     /**

@@ -35,7 +35,7 @@ class PluginAccountBind extends Model
      */
     public function user(): HasOne
     {
-        return $this->hasOne(PluginAccountUser::class, 'id', 'umid');
+        return $this->hasOne(PluginAccountUser::class, 'id', 'unid');
     }
 
     /**
@@ -44,7 +44,7 @@ class PluginAccountBind extends Model
      */
     public function auths(): HasMany
     {
-        return $this->hasMany(PluginAccountAuth::class, 'unid', 'id');
+        return $this->hasMany(PluginAccountAuth::class, 'usid', 'id');
     }
 
     /**

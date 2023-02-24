@@ -18,11 +18,36 @@ declare (strict_types=1);
 
 namespace plugin\account;
 
+use plugin\account\model\PluginAccountUserAddress;
+use plugin\account\model\PluginAccountUserBalance;
 use think\admin\Plugin;
 
 class Service extends Plugin
 {
     protected $package = 'zoujingli/think-plugs-account';
+
+    public function register(): void
+    {
+        // 主账号绑定处理
+        $this->app->event->listen('ThinkPlugsAccountBind', function (array $data) {
+            // 更新数据条件
+            $map = [['unid', '<>', $data['unid']], ['usid', '=', $data['usid']]];
+            // 更新收货地址
+            PluginAccountUserAddress::mk()->where($map)->update(['unid' => $data['unid']]);
+            // 更新余额记录
+            PluginAccountUserBalance::mk()->where($map)->update(['unid' => $data['unid']]);
+        });
+
+        // 主账号解绑处理
+        $this->app->event->listen('ThinkPlugsAccountUnbind', function (array $data) {
+            // 更新数据条件
+            $map = [['unid', '>', 0], ['usid', '=', $data['usid']]];
+            // 更新收货地址
+            PluginAccountUserAddress::mk()->where($map)->update(['usid' => 0]);
+            // 更新余额记录
+            PluginAccountUserBalance::mk()->where($map)->update(['usid' => 0]);
+        });
+    }
 
     public static function menu(): array
     {
