@@ -17,9 +17,17 @@
     "zoujingli/think-library": "^6.1|v6.0.x-dev",
     "zoujingli/think-plugs-wechat": "^1.0|dev-master"
   },
+  "require-dev": {
+    "phpunit/phpunit": "^7.0"
+  },
   "autoload": {
     "psr-4": {
       "plugin\\account\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "think\\admin\\tests\\": "tests/"
     }
   },
   "extra": {

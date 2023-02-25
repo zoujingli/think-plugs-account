@@ -21,7 +21,6 @@ namespace plugin\account\service;
 use plugin\account\model\PluginAccountUser;
 use plugin\account\model\PluginAccountUserBalance;
 use think\admin\Exception;
-use think\admin\service\AdminService;
 
 /**
  * 用户余额调度器
@@ -44,7 +43,18 @@ class Balance
     {
         $user = PluginAccountUser::mk()->findOrEmpty($unid);
         if ($user->isEmpty()) throw new Exception('账号不存在！');
-        ($model = PluginAccountUserBalance::mk())->save([
+
+        // 扣减余额检查
+        $map = ['unid' => $unid, 'deleted' => 0];
+        $usable = PluginAccountUserBalance::mk()->where($map)->sum('amount');
+        if ($amount < 0 && $amount + $usable) throw new Exception('扣减余额不足！');
+
+        // 检查编号是否重复
+        $map = ['unid' => $unid, 'code' => $code, 'deleted' => 0];
+        $model = PluginAccountUserBalance::mk()->where($map)->findOrEmpty();
+
+        // 更新或写入余额变更
+        $model->save([
             'unid'        => $unid,
             'code'        => $code,
             'name'        => $name,
@@ -53,10 +63,14 @@ class Balance
             'status'      => 1,
             'unlock'      => 0,
             'unlock_time' => date('Y-m-d H:i:s'),
-            'create_by'   => AdminService::getUserId()
+            //'create_by'   => AdminService::getUserId()
         ]);
-        self::recount($unid);
-        return $model->refresh();
+        if ($model->isExists()) {
+            self::recount($unid);
+            return $model->refresh();
+        } else {
+            throw new Exception('余额变更失败！');
+        }
     }
 
     /**
@@ -67,7 +81,8 @@ class Balance
      */
     public static function unlock(string $code): PluginAccountUserBalance
     {
-        $model = PluginAccountUserBalance::mk()->where(['code' => $code])->findOrEmpty();
+        $map = ['code' => $code, 'deleted' => 0];
+        $model = PluginAccountUserBalance::mk()->where($map)->findOrEmpty();
         if ($model->isEmpty()) throw new Exception('无效的操作编号！');
         $model->save(['unlock' => 1, 'unlock_time' => date('Y-m-d H:i:s')]);
         self::recount($model->getAttr('unid'));
@@ -82,7 +97,8 @@ class Balance
      */
     public static function cancel(string $code): PluginAccountUserBalance
     {
-        $model = PluginAccountUserBalance::mk()->where(['code' => $code])->findOrEmpty();
+        $map = ['code' => $code, 'deleted' => 0];
+        $model = PluginAccountUserBalance::mk()->where($map)->findOrEmpty();
         if ($model->isEmpty()) throw new Exception('无效的操作编号！');
         $model->save(['cancel' => 1, 'cancel_time' => date('Y-m-d H:i:s')]);
         self::recount($model->getAttr('unid'));
@@ -99,12 +115,14 @@ class Balance
     {
         $user = PluginAccountUser::mk()->findOrEmpty($unid);
         if ($user->isEmpty()) throw new Exception('账号不存在！');
+        // 统计用户余额数据
         $map = ['unid' => $unid, 'cancel' => 0, 'deleted' => 0];
-        $lock = PluginAccountUserBalance::mk()->where($map)->whereRaw('lock=0')->sum('amount');
-        $used = PluginAccountUserBalance::mk()->where($map)->whereRaw('amount<0')->sum('amount');
-        $total = PluginAccountUserBalance::mk()->where($map)->whereRaw('amount>0')->sum('amount');
+        $lock = PluginAccountUserBalance::mk()->where($map)->where('unlock', '=', '1')->sum('amount');
+        $used = PluginAccountUserBalance::mk()->where($map)->where('amount', '<', '0')->sum('amount');
+        $total = PluginAccountUserBalance::mk()->where($map)->where('amount', '>', '0')->sum('amount');
+        // 更新用户余额统计
         $data = ['balance_total' => $total, 'balance_used' => $used, 'balance_lock' => $lock];
-        $user->setAttr('extra', $user->getAttr('extra') + $data);
-        return $user->refresh();
+        $user->setAttr('extra', array_merge($user->getAttr('extra'), $data));
+        return $user->save() ? $user->refresh() : $user;
     }
 }

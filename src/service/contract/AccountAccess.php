@@ -145,7 +145,7 @@ class AccountAccess implements AccountInterface
     {
         $data = $this->bind->hidden(['password'])->toArray();
         if ($this->bind->isExists()) {
-            $data['user'] = (object)$this->bind->user()->findOrEmpty()->toArray();
+            $data['user'] = $this->bind->user()->findOrEmpty()->toArray();
             if ($rejwt) $data['token'] = JwtExtend::getToken([
                 'type'  => $this->auth->getAttr('type'),
                 'token' => $this->auth->getAttr('token'),
@@ -170,7 +170,7 @@ class AccountAccess implements AccountInterface
         }
         if (!empty($data['extra'])) {
             $extra = $user->getAttr('extra');
-            $user->setAttr('extra', $extra + $data['extra']);
+            $user->setAttr('extra', array_merge($extra, $data['extra']));
             unset($data['extra']);
         }
         if ($user->save($data + $map) && $user->isExists()) {
@@ -271,7 +271,7 @@ class AccountAccess implements AccountInterface
         }
         if (!empty($data['extra'])) {
             $extra = $this->bind->getAttr('extra');
-            $this->bind->setAttr('extra', $extra + $data['extra']);
+            $this->bind->setAttr('extra', array_merge($extra, $data['extra']));
             unset($data['extra']);
         }
         if ($this->bind->save($data) && $this->bind->isExists()) {
