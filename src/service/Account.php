@@ -36,7 +36,7 @@ abstract class Account
     const IOSAPP = 'iosapp';
     const ANDROID = 'android';
 
-    private static $initd = false;
+    private static $init = false;
 
     private static $types = [
         self::WAP     => ['name' => '手机浏览器', 'field' => 'phone', 'status' => 1],
@@ -79,18 +79,19 @@ abstract class Account
 
     /**
      * 获取全部通道
-     * @return array[]
+     * @param ?int $status 指定状态
+     * @return array
      */
-    public static function getTypes(): array
+    public static function getTypes(?int $status = null): array
     {
         try {
-            if (self::$initd) return self::$types;
+            [$all, self::$init] = [[], true];
             $denys = sysdata('plugin.account.denys');
-            foreach (self::$types as $k => &$v) {
-                $v['status'] = intval(!in_array($k, $denys));
+            foreach (self::$types as $type => &$item) {
+                $item['status'] = intval(!in_array($type, $denys));
+                if (is_null($status) || $item['status'] === $status) $all[$type] = $item;
             }
-            self::$initd = true;
-            return self::$types;
+            return $all;
         } catch (\Exception $exception) {
             return [];
         }
@@ -103,7 +104,7 @@ abstract class Account
      */
     public static function getField(string $type): string
     {
-        self::$initd || self::getTypes();
+        self::$init || self::getTypes();
         if (!empty(self::$types[$type]['status'])) {
             return self::$types[$type]['field'] ?? '';
         } else {

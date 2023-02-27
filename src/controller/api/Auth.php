@@ -61,7 +61,7 @@ abstract class Auth extends Controller
     {
         try {
             // 读取用户账号数据
-            $auther = JwtExtend::getInData();
+            $auther = JwtExtend::verifyToken($this->request->header('api-token', ''));
             $this->account = Account::mk($auther['type'] ?? '-', $auther['token'] ?? '-');
             $this->bind = $this->account->check();
             $this->usid = $this->bind['id'] ?? 0;
@@ -69,7 +69,7 @@ abstract class Auth extends Controller
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
-            $this->error($exception->getMessage(), '{-null-}', $exception->getCode());
+            $this->error($exception->getMessage(), $exception->getTrace(), $exception->getCode());
         }
     }
 

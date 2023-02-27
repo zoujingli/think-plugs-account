@@ -90,12 +90,12 @@ class AccountAccess implements AccountInterface
     /**
      * 初始化通道
      * @param string $token
-     * @return \plugin\account\service\contract\AccountInterface
+     * @return AccountInterface
      */
     public function init(string $token = ''): AccountInterface
     {
         if (!empty($token)) {
-            $map = ['type' => $this->type, 'token' => $token, 'deleted' => 0];
+            $map = ['type' => $this->type, 'token' => $token];
             $this->auth = PluginAccountAuth::mk()->where($map)->findOrEmpty();
             $this->bind = $this->auth->device()->findOrEmpty();
         } else {
@@ -111,16 +111,15 @@ class AccountAccess implements AccountInterface
      * @param boolean $rejwt 返回令牌
      * @return array
      * @throws \think\admin\Exception
-     * @throws \think\db\exception\DbException
      */
     public function set(array $data = [], bool $rejwt = false): array
     {
         $data['type'] = $this->type;
         // 如果传入授权验证字段
-        if (isset($data[$this->field]) && $data[$this->field]) {
+        if (isset($data[$this->field])) {
             if ($this->bind->isExists()) {
-                if ($data[$this->field] !== $this->bind[$this->field]) {
-                    throw new Exception('禁用替换用户禁用');
+                if ($data[$this->field] !== $this->bind->getAttr($this->field)) {
+                    throw new Exception('不能直接更换绑定');
                 }
             } else {
                 $map = [$this->field => $data[$this->field]];
@@ -133,7 +132,7 @@ class AccountAccess implements AccountInterface
         if ($this->bind->isEmpty()) {
             throw new Exception("更新用户资料失败！");
         } else {
-            return $this->token(intval($this->bind['id']))->get($rejwt);
+            return $this->token(intval($this->bind->getAttr('id')))->get($rejwt);
         }
     }
 
@@ -146,7 +145,7 @@ class AccountAccess implements AccountInterface
     {
         $data = $this->bind->hidden(['password'])->toArray();
         if ($this->bind->isExists()) {
-            $data['user'] = $this->bind->user()->findOrEmpty()->toArray();
+            $data['user'] = (object)$this->bind->user()->findOrEmpty()->toArray();
             if ($rejwt) $data['token'] = JwtExtend::getToken([
                 'type'  => $this->auth->getAttr('type'),
                 'token' => $this->auth->getAttr('token'),
@@ -166,7 +165,7 @@ class AccountAccess implements AccountInterface
     {
         if ($this->bind->isEmpty()) throw new Exception('终端用户不存在！');
         $user = PluginAccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
-        if ($this->bind['unid'] > 0 && ($user->isEmpty() || $this->bind['unid'] !== $user['id'])) {
+        if ($this->bind->getAttr('unid') > 0 && ($user->isEmpty() || $this->bind->getAttr('unid') !== $user['id'])) {
             throw new Exception("已绑定其他用户！");
         }
         if (!empty($data['extra'])) {
@@ -177,7 +176,7 @@ class AccountAccess implements AccountInterface
         if ($user->save($data + $map) && $user->isExists()) {
             $this->bind->save(['unid' => $user['id']]);
             $this->app->event->trigger('ThinkPlugsAccountBind', [
-                'unid' => intval($user['id']), 'usid' => intval($this->bind['id']),
+                'unid' => intval($user['id']), 'usid' => intval($this->bind->getAttr('id')),
             ]);
             return $this->get();
         } else {
@@ -195,10 +194,10 @@ class AccountAccess implements AccountInterface
         if ($this->bind->isEmpty()) {
             throw new Exception('终端账号不存在！');
         }
-        if (($unid = $this->bind['unid']) > 0) {
+        if (($unid = $this->bind->getAttr('unid')) > 0) {
             $this->bind->save(['unid' => 0]);
             $this->app->event->trigger('ThinkPlugsAccountUnbind', [
-                'unid' => $unid, 'usid' => $this->bind['id'],
+                'unid' => $unid, 'usid' => $this->bind->getAttr('id'),
             ]);
         }
         return $this->get();
@@ -214,8 +213,8 @@ class AccountAccess implements AccountInterface
         if ($this->bind->isEmpty()) {
             throw new Exception('登录令牌无效，请重新登录！', 401);
         }
-        if ($this->auth['token'] !== $this->tester) {
-            if ($this->expire > 0 && $this->auth['expire'] < time()) {
+        if ($this->auth->getAttr('token') !== $this->tester) {
+            if ($this->expire > 0 && $this->auth->getAttr('time') < time()) {
                 throw new Exception('登录认证超时，请重新登录！', 502);
             }
         }
@@ -226,7 +225,6 @@ class AccountAccess implements AccountInterface
      * 生成授权令牌
      * @param integer $unid
      * @return \plugin\account\service\contract\AccountInterface
-     * @throws \think\db\exception\DbException
      */
     public function token(int $unid): AccountInterface
     {
@@ -243,10 +241,8 @@ class AccountAccess implements AccountInterface
             do $data = ['type' => $this->type, 'token' => md5(uniqid(strval(rand(0, 999))))];
             while (PluginAccountAuth::mk()->where($data)->findOrEmpty()->isExists());
             $this->auth->save($data + ['usid' => $unid]);
-        } else {
-            $this->expire();
         }
-        return $this;
+        return $this->expire();
     }
 
     /**
