@@ -27,4 +27,23 @@ use think\admin\Model;
  */
 class PluginAccountUserAddress extends Model
 {
+    /**
+     * 格式化输出时间
+     * @param mixed $value
+     * @return string
+     */
+    public function getCreateTimeAttr($value): string
+    {
+        return format_datetime($value);
+    }
+
+    /**
+     * 格式化输出时间
+     * @param mixed $value
+     * @return string
+     */
+    public function getUpdateTimeAttr($value): string
+    {
+        return format_datetime($value);
+    }
 }
