@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | Account Plugin for ThinkAdmin
 // +----------------------------------------------------------------------
-// | 版权所有 2022~2023 Anyon <zoujingli@qq.com>
+// | 版权所有 2022~2023 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -23,6 +23,11 @@ use plugin\account\model\PluginAccountUserBalance;
 use think\admin\Exception;
 use think\admin\service\AdminService;
 
+/**
+ * 用户余额调度器
+ * Class Balance
+ * @package plugin\account\service
+ */
 class Balance
 {
     /**
@@ -32,13 +37,13 @@ class Balance
      * @param string $name 变更标题
      * @param float $amount 变更金额
      * @param string $remark 变更描述
-     * @return array
+     * @return PluginAccountUserBalance
      * @throws \think\admin\Exception
      */
-    public static function create(int $unid, string $code, string $name, float $amount, string $remark = ''): array
+    public static function create(int $unid, string $code, string $name, float $amount, string $remark = ''): PluginAccountUserBalance
     {
-        $user = PluginAccountUser::mk()->where(['id' => $unid])->findOrEmpty();
-        if ($user->isEmpty()) throw new Exception('用户账号不存在！');
+        $user = PluginAccountUser::mk()->findOrEmpty($unid);
+        if ($user->isEmpty()) throw new Exception('账号不存在！');
         ($model = PluginAccountUserBalance::mk())->save([
             'unid'        => $unid,
             'code'        => $code,
@@ -51,62 +56,55 @@ class Balance
             'create_by'   => AdminService::getUserId()
         ]);
         self::recount($unid);
-        return $model->refresh()->toArray();
+        return $model->refresh();
     }
 
     /**
      * 解锁余额变更操作
      * @param string $code
-     * @return array
+     * @return PluginAccountUserBalance
+     * @throws \think\admin\Exception
      */
-    public static function unlock(string $code): array
+    public static function unlock(string $code): PluginAccountUserBalance
     {
         $model = PluginAccountUserBalance::mk()->where(['code' => $code])->findOrEmpty();
-        if ($model->isExists()) {
-            $model->save(['unlock' => 1, 'unlock_time' => date('Y-m-d H:i:s')]);
-            self::recount($model->getAttr('unid'));
-            return $model->refresh()->toArray();
-        } else {
-            return [];
-        }
+        if ($model->isEmpty()) throw new Exception('无效的操作编号！');
+        $model->save(['unlock' => 1, 'unlock_time' => date('Y-m-d H:i:s')]);
+        self::recount($model->getAttr('unid'));
+        return $model->refresh();
     }
 
     /**
      * 作废余额变更操作
      * @param string $code
-     * @return array
+     * @return PluginAccountUserBalance
+     * @throws \think\admin\Exception
      */
-    public static function cancel(string $code): array
+    public static function cancel(string $code): PluginAccountUserBalance
     {
         $model = PluginAccountUserBalance::mk()->where(['code' => $code])->findOrEmpty();
-        if ($model->isExists()) {
-            $model->save(['cancel' => 1, 'cancel_time' => date('Y-m-d H:i:s')]);
-            self::recount($model->getAttr('unid'));
-            return $model->refresh()->toArray();
-        } else {
-            return [];
-        }
+        if ($model->isEmpty()) throw new Exception('无效的操作编号！');
+        $model->save(['cancel' => 1, 'cancel_time' => date('Y-m-d H:i:s')]);
+        self::recount($model->getAttr('unid'));
+        return $model->refresh();
     }
 
     /**
      * 重新记录用户余额
      * @param integer $unid
-     * @return array
+     * @return PluginAccountUser
+     * @throws \think\admin\Exception
      */
-    public static function recount(int $unid): array
+    public static function recount(int $unid): PluginAccountUser
     {
         $user = PluginAccountUser::mk()->findOrEmpty($unid);
-        if ($user->isExists()) {
-            $map = ['unid' => $unid, 'cancel' => 0, 'deleted' => 0];
-            $model = PluginAccountUserBalance::mk();
-            $lock = $model->where($map)->whereRaw('lock=0')->sum('amount');
-            $used = $model->where($map)->whereRaw('amount<0')->sum('amount');
-            $total = $model->where($map)->whereRaw('amount>0')->sum('amount');
-            $data = ['balance_total' => $total, 'balance_used' => $used, 'balance_lock' => $lock];
-            $user->setAttr('extra', $user->getAttr('extra') + $data);
-            return $user->refresh()->toArray();
-        } else {
-            return [];
-        }
+        if ($user->isEmpty()) throw new Exception('账号不存在！');
+        $map = ['unid' => $unid, 'cancel' => 0, 'deleted' => 0];
+        $lock = PluginAccountUserBalance::mk()->where($map)->whereRaw('lock=0')->sum('amount');
+        $used = PluginAccountUserBalance::mk()->where($map)->whereRaw('amount<0')->sum('amount');
+        $total = PluginAccountUserBalance::mk()->where($map)->whereRaw('amount>0')->sum('amount');
+        $data = ['balance_total' => $total, 'balance_used' => $used, 'balance_lock' => $lock];
+        $user->setAttr('extra', $user->getAttr('extra') + $data);
+        return $user->refresh();
     }
 }
