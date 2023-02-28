@@ -7,6 +7,36 @@ use plugin\account\service\Account;
 
 class AccountTest extends TestCase
 {
+
+    public function testAddType()
+    {
+        Account::addType('test', '测试接口');
+        $this->assertIsString(Account::getField('test'));
+    }
+
+    public function testGetTypes()
+    {
+        $info = Account::getTypes();
+        $this->assertIsArray($info);
+    }
+
+    public function testChangeType()
+    {
+        $field = Account::getField('web');
+        $this->assertNotEmpty($field);
+
+        Account::setStatus('web', 0);
+
+        $field = Account::getField('web');
+        $this->assertEmpty($field);
+
+        try {
+            Account::mk('web');
+        } catch (\think\admin\Exception $exception) {
+            $this->assertStringContainsString('未定义', $exception->getMessage());
+        }
+    }
+
     public function testAddAccount()
     {
         $account = Account::mk(Account::WAP);
