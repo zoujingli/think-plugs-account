@@ -43,12 +43,6 @@ abstract class Auth extends Controller
     protected $usid;
 
     /**
-     * 终端用户数据
-     * @var array
-     */
-    protected $bind;
-
-    /**
      * 终端账号接口
      * @var \plugin\account\service\contract\AccountInterface
      */
@@ -63,13 +57,13 @@ abstract class Auth extends Controller
             // 读取用户账号数据
             $auther = JwtExtend::verifyToken($this->request->header('api-token', ''));
             $this->account = Account::mk($auther['type'] ?? '-', $auther['token'] ?? '-');
-            $this->bind = $this->account->check();
-            $this->usid = $this->bind['id'] ?? 0;
-            $this->unid = $this->bind['unid'] ?? 0;
+            $bind = $this->account->check();
+            $this->usid = intval($bind['id'] ?? 0);
+            $this->unid = intval($bind['unid'] ?? 0);
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
-            $this->error($exception->getMessage(), $exception->getTrace(), $exception->getCode());
+            $this->error($exception->getMessage(), [], $exception->getCode());
         }
     }
 
@@ -78,8 +72,12 @@ abstract class Auth extends Controller
      */
     protected function checkUserStatus()
     {
-        if (empty($this->bind['status'])) {
+        $bind = $this->account->get();
+        if (empty($bind['status'])) {
             $this->error('终端用户已被冻结！');
+        }
+        if (!empty($bind['user']) && empty($this->bind['user']['status'])) {
+            $this->error('用户账号已被冻结！');
         }
     }
 }

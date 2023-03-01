@@ -21,35 +21,28 @@ namespace plugin\account\controller\api\auth;
 use plugin\account\controller\api\Auth;
 
 /**
- * 用户资料管理
+ * 用户账号管理
  * Class Center
  * @package plugin\account\controller\api\auth
  */
 class Center extends Auth
 {
     /**
-     * 更新用户资料
-     * @return void
-     */
-    public function set()
-    {
-        $data = $this->_vali([
-            'headimg.default'  => '',
-            'username.default' => '',
-        ]);
-
-        foreach ($data as $key => $vo) if ($vo === '') unset($data[$key]);
-        if (empty($data)) $this->error('没有修改的数据！');
-
-        $this->success('更新用户资料！', $this->account->set($data));
-    }
-
-    /**
-     * 获取用户资料
+     * 获取用户账号
      * @return void
      */
     public function get()
     {
-        $this->success('获取用户资料！', $this->account->get());
+        $this->success('获取用户账号！', $this->account->get());
+    }
+
+    /**
+     * 解除账号关联
+     * @return void
+     */
+    public function unbind()
+    {
+        $this->account->unbind();
+        $this->success('解除关联成功！', $this->account->get());
     }
 }

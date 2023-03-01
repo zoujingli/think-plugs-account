@@ -30,7 +30,6 @@ class InstallAccount extends Migrator
         $this->_create_plugin_account_auth();
         $this->_create_plugin_account_bind();
         $this->_create_plugin_account_user();
-        // $this->_create_plugin_account_user_address();
     }
 
     /**
@@ -137,67 +136,30 @@ class InstallAccount extends Migrator
         ])
             ->addColumn('path', 'string', ['limit' => 999, 'default' => ',,', 'null' => true, 'comment' => '关系路径'])
             ->addColumn('phone', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '用户手机'])
-            ->addColumn('headimg', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '用户头像'])
-            ->addColumn('nickname', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '用户昵称'])
+            ->addColumn('unionid', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => 'UnionID'])
             ->addColumn('username', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => '用户姓名'])
-            ->addColumn('remark', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '用户备注'])
+            ->addColumn('nickname', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '用户昵称'])
+            ->addColumn('headimg', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '用户头像'])
+            ->addColumn('region_prov', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '所在省份'])
+            ->addColumn('region_city', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '所在城市'])
+            ->addColumn('region_area', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '所在区域'])
+            ->addColumn('remark', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '备注(内部使用)'])
             ->addColumn('extra', 'text', ['default' => NULL, 'null' => true, 'comment' => '扩展数据'])
             ->addColumn('sort', 'integer', ['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '排序权重'])
             ->addColumn('status', 'integer', ['limit' => 1, 'default' => 1, 'null' => true, 'comment' => '用户状态(0拉黑,1正常)'])
             ->addColumn('deleted', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '删除状态(0未删,1已删)'])
             ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '注册时间'])
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
-            ->addIndex('sort', ['name' => 'idx_plugin_account_user_sort'])
             ->addIndex('phone', ['name' => 'idx_plugin_account_user_phone'])
+            ->addIndex('unionid', ['name' => 'idx_plugin_account_user_unionid'])
+            ->addIndex('username', ['name' => 'idx_plugin_account_user_username'])
+            ->addIndex('region_prov', ['name' => 'idx_plugin_account_user_region_prov'])
+            ->addIndex('region_city', ['name' => 'idx_plugin_account_user_region_city'])
+            ->addIndex('region_area', ['name' => 'idx_plugin_account_user_region_area'])
+            ->addIndex('sort', ['name' => 'idx_plugin_account_user_sort'])
             ->addIndex('status', ['name' => 'idx_plugin_account_user_status'])
             ->addIndex('deleted', ['name' => 'idx_plugin_account_user_deleted'])
             ->addIndex('create_time', ['name' => 'idx_plugin_account_user_create_time'])
-            ->save();
-
-        // 修改主键长度
-        $this->table($table)->changeColumn('id', 'integer', ['limit' => 20, 'identity' => true]);
-    }
-
-    /**
-     * 创建数据对象
-     * @class PluginAccountUserAddress
-     * @table plugin_account_user_address
-     * @return void
-     * @deprecated 将迁到其他插件
-     */
-    protected function _create_plugin_account_user_address()
-    {
-
-        // 当前数据表
-        $table = 'plugin_account_user_address';
-
-        // 存在则跳过
-        if ($this->hasTable($table)) return;
-
-        // 创建数据表
-        $this->table($table, [
-            'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '插件-账号-地址',
-        ])
-            ->addColumn('unid', 'integer', ['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '主账号ID'])
-            ->addColumn('usid', 'integer', ['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '子账号ID'])
-            ->addColumn('type', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '默认状态(0普通,1默认)'])
-            ->addColumn('name', 'string', ['limit' => 100, 'default' => '', 'null' => true, 'comment' => '收货人姓名'])
-            ->addColumn('phone', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '收货人手机'])
-            ->addColumn('idcode', 'string', ['limit' => 255, 'default' => '', 'null' => true, 'comment' => '身体证证号'])
-            ->addColumn('idimg1', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '身份证正面'])
-            ->addColumn('idimg2', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '身份证反面'])
-            ->addColumn('region_prov', 'string', ['limit' => 100, 'default' => '', 'null' => true, 'comment' => '地址-省份'])
-            ->addColumn('region_city', 'string', ['limit' => 100, 'default' => '', 'null' => true, 'comment' => '地址-城市'])
-            ->addColumn('region_area', 'string', ['limit' => 100, 'default' => '', 'null' => true, 'comment' => '地址-区域'])
-            ->addColumn('region_addr', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '地址-详情'])
-            ->addColumn('deleted', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '删除状态(0未删除,1已删除)'])
-            ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '创建时间'])
-            ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
-            ->addIndex('type', ['name' => 'idx_plugin_account_user_address_type'])
-            ->addIndex('usid', ['name' => 'idx_plugin_account_user_address_usid'])
-            ->addIndex('unid', ['name' => 'idx_plugin_account_user_address_unid'])
-            ->addIndex('phone', ['name' => 'idx_plugin_account_user_address_phone'])
-            ->addIndex('deleted', ['name' => 'idx_plugin_account_user_address_deleted'])
             ->save();
 
         // 修改主键长度
