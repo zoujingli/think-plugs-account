@@ -30,7 +30,7 @@ class InstallAccount extends Migrator
         $this->_create_plugin_account_auth();
         $this->_create_plugin_account_bind();
         $this->_create_plugin_account_user();
-        $this->_create_plugin_account_user_address();
+        // $this->_create_plugin_account_user_address();
     }
 
     /**
@@ -163,8 +163,9 @@ class InstallAccount extends Migrator
      * @class PluginAccountUserAddress
      * @table plugin_account_user_address
      * @return void
+     * @deprecated 将迁到其他插件
      */
-    private function _create_plugin_account_user_address()
+    protected function _create_plugin_account_user_address()
     {
 
         // 当前数据表

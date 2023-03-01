@@ -23,6 +23,7 @@ use think\admin\Model;
 /**
  * 用户地址模型
  * Class PluginAccountUserAddress
+ * @deprecated 将迁到其他插件
  * @package plugin\account\model
  */
 class PluginAccountUserAddress extends Model

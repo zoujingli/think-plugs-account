@@ -18,27 +18,11 @@ declare (strict_types=1);
 
 namespace plugin\account;
 
-use plugin\account\model\PluginAccountUserAddress;
 use think\admin\Plugin;
 
 class Service extends Plugin
 {
     protected $package = 'zoujingli/think-plugs-account';
-
-    public function register(): void
-    {
-        // 主账号绑定处理
-        $this->app->event->listen('ThinkPlugsAccountBind', function (array $data) {
-            $map = [['unid', '<>', $data['unid']], ['usid', '=', $data['usid']]];
-            PluginAccountUserAddress::mk()->where($map)->update(['unid' => $data['unid']]);
-        });
-
-        // 主账号解绑处理
-        $this->app->event->listen('ThinkPlugsAccountUnbind', function (array $data) {
-            $map = [['unid', '>', 0], ['usid', '=', $data['usid']]];
-            PluginAccountUserAddress::mk()->where($map)->update(['usid' => 0]);
-        });
-    }
 
     public static function menu(): array
     {

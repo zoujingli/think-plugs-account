@@ -24,6 +24,7 @@ use plugin\account\model\PluginAccountUserAddress;
 /**
  * 用户收货地址管理
  * Class Address
+ * @deprecated 将迁到其他插件
  * @package plugin\account\controller\api\auth
  */
 class Address extends Auth
