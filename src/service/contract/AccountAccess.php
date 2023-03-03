@@ -222,15 +222,6 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 生成随机编号
-     * @return string
-     */
-    private function grenCode(): string
-    {
-        return 'U' . CodeExtend::random(15);
-    }
-
-    /**
      * 检查是否有效
      * @return array
      * @throws \think\admin\Exception
@@ -306,5 +297,14 @@ class AccountAccess implements AccountInterface
         } else {
             throw new Exception('用户数据保存失败！');
         }
+    }
+
+    /**
+     * 生成随机编号
+     * @return string
+     */
+    private function grenCode(): string
+    {
+        return 'U' . CodeExtend::random(15);
     }
 }
