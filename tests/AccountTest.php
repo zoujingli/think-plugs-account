@@ -48,12 +48,16 @@ class AccountTest extends TestCase
     {
         $username = 'UserName' . uniqid();
         $account = Account::mk(Account::WAP);
-        $account->set(['phone' => '138888888888']);
+        $phone = '13888888' . mt_rand(1000, 9999);
+        $account->set(['phone' => $phone]);
 
         // 关联绑定主账号
-        $info = $account->bind(['phone' => '138888888888'], ['username' => $username]);
-
+        $info = $account->bind(['phone' => $phone], ['username' => $username]);
         $this->assertEquals($info['user']['username'], $username, '账号绑定关联成功！');
+
+        // 刷新主账号序号
+        $news = $account->recode();
+        $this->assertNotEquals($info['user']['code'], $news['user']['code'], '刷新用户序号成功');
     }
 
     public function testUnbindAccount()

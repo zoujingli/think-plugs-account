@@ -169,9 +169,12 @@ class AccountAccess implements AccountInterface
             throw new Exception("已绑定其他用户！");
         }
         if (!empty($data['extra'])) {
-            $extra = $user->getAttr('extra');
-            $user->setAttr('extra', array_merge($extra, $data['extra']));
+            $user->setAttr('extra', array_merge($user->getAttr('extra'), $data['extra']));
             unset($data['extra']);
+        }
+        if ($user->isEmpty()) {
+            do $data['code'] = 'U' . substr(strtoupper(md5(uniqid(strval(rand(0, 999)), true))), -15);
+            while (PluginAccountUser::mk()->where(['code' => $data['code']])->findOrEmpty()->isExists());
         }
         if ($user->save($data + $map) && $user->isExists()) {
             $this->bind->save(['unid' => $user['id']]);
@@ -199,6 +202,20 @@ class AccountAccess implements AccountInterface
             $this->app->event->trigger('ThinkPlugsAccountUnbind', [
                 'unid' => $unid, 'usid' => $this->bind->getAttr('id'),
             ]);
+        }
+        return $this->get();
+    }
+
+    /**
+     * 刷新账号序号
+     * @return array
+     */
+    public function recode(): array
+    {
+        if ($this->bind->isExists() && ($user = $this->bind->user()->findOrEmpty())->isExists()) {
+            do $code = 'U' . substr(strtoupper(md5(uniqid(strval(rand(0, 999)), true))), -15);
+            while (PluginAccountUser::mk()->where(['code' => $code])->findOrEmpty()->isExists());
+            $user->save(['code' => $code]);
         }
         return $this->get();
     }

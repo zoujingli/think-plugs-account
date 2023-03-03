@@ -62,6 +62,12 @@ interface AccountInterface
     public function unbind(): array;
 
     /**
+     * 刷新账号序号
+     * @return array
+     */
+    public function recode(): array;
+
+    /**
      * 检查是否有效
      * @return array
      * @throws \think\admin\Exception

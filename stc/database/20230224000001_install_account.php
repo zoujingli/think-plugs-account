@@ -134,7 +134,7 @@ class InstallAccount extends Migrator
         $this->table($table, [
             'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '插件-账号-资料',
         ])
-            ->addColumn('path', 'string', ['limit' => 999, 'default' => ',,', 'null' => true, 'comment' => '关系路径'])
+            ->addColumn('code', 'string', ['limit' => 16, 'default' => '', 'null' => true, 'comment' => '用户编号'])
             ->addColumn('phone', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '用户手机'])
             ->addColumn('email', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '用户账号'])
             ->addColumn('unionid', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => 'UnionID'])
@@ -151,6 +151,7 @@ class InstallAccount extends Migrator
             ->addColumn('deleted', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '删除状态(0未删,1已删)'])
             ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '注册时间'])
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
+            ->addIndex('code', ['name' => 'idx_plugin_account_user_code'])
             ->addIndex('phone', ['name' => 'idx_plugin_account_user_phone'])
             ->addIndex('email', ['name' => 'idx_plugin_account_user_email'])
             ->addIndex('unionid', ['name' => 'idx_plugin_account_user_unionid'])
