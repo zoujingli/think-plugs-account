@@ -22,6 +22,7 @@ use plugin\account\model\PluginAccountAuth;
 use plugin\account\model\PluginAccountBind;
 use plugin\account\model\PluginAccountUser;
 use think\admin\Exception;
+use think\admin\extend\CodeExtend;
 use think\admin\extend\JwtExtend;
 use think\App;
 
@@ -173,7 +174,7 @@ class AccountAccess implements AccountInterface
             unset($data['extra']);
         }
         if ($user->isEmpty()) {
-            do $data['code'] = 'U' . substr(strtoupper(md5(uniqid(strval(rand(0, 999)), true))), -15);
+            do $data['code'] = $this->grenCode();
             while (PluginAccountUser::mk()->where(['code' => $data['code']])->findOrEmpty()->isExists());
         }
         if ($user->save($data + $map) && $user->isExists()) {
@@ -213,11 +214,20 @@ class AccountAccess implements AccountInterface
     public function recode(): array
     {
         if ($this->bind->isExists() && ($user = $this->bind->user()->findOrEmpty())->isExists()) {
-            do $code = 'U' . substr(strtoupper(md5(uniqid(strval(rand(0, 999)), true))), -15);
-            while (PluginAccountUser::mk()->where(['code' => $code])->findOrEmpty()->isExists());
-            $user->save(['code' => $code]);
+            do $data = ['code' => $this->grenCode()];
+            while (PluginAccountUser::mk()->where($data)->findOrEmpty()->isExists());
+            $user->save($data);
         }
         return $this->get();
+    }
+
+    /**
+     * 生成随机编号
+     * @return string
+     */
+    private function grenCode(): string
+    {
+        return 'U' . CodeExtend::random(15);
     }
 
     /**
