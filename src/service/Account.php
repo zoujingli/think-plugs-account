@@ -36,7 +36,7 @@ abstract class Account
     const IOSAPP = 'iosapp';
     const ANDROID = 'android';
 
-    private static $init = false;
+    private static $denys = null;
 
     private static $types = [
         self::WAP     => ['name' => '手机浏览器', 'field' => 'phone', 'status' => 1],
@@ -65,6 +65,22 @@ abstract class Account
     }
 
     /**
+     * 初始化数据状态
+     * @return array[]
+     */
+    private static function init(): array
+    {
+        if (is_null(self::$denys)) try {
+            self::$denys = sysdata('plugin.account.denys');
+            foreach (self::$types as $type => &$item) {
+                $item['status'] = intval(!in_array($type, self::$denys));
+            }
+        } catch (\Exception $exception) {
+        }
+        return self::$types;
+    }
+
+    /**
      * 动态增加通道
      * @param string $type
      * @param string $name
@@ -85,10 +101,8 @@ abstract class Account
     public static function getTypes(?int $status = null): array
     {
         try {
-            [$all, self::$init] = [[], true];
-            $denys = sysdata('plugin.account.denys');
-            foreach (self::$types as $type => &$item) {
-                $item['status'] = intval(!in_array($type, $denys));
+            $all = [];
+            foreach (self::init() as $type => $item) {
                 if (is_null($status) || $item['status'] === $status) $all[$type] = $item;
             }
             return $all;
@@ -104,9 +118,9 @@ abstract class Account
      */
     public static function getField(string $type): string
     {
-        self::$init || self::getTypes();
-        if (!empty(self::$types[$type]['status'])) {
-            return self::$types[$type]['field'] ?? '';
+        $types = self::init();
+        if (!empty($types[$type]['status'])) {
+            return $types[$type]['field'] ?? '';
         } else {
             return '';
         }
@@ -121,7 +135,7 @@ abstract class Account
     public static function setStatus(string $type, int $status): bool
     {
         if (isset(self::$types[$type])) {
-            self::$types[$type]['status'] = intval(!!$status);
+            self::$types[$type]['status'] = $status;
             return true;
         } else {
             return false;
@@ -137,10 +151,10 @@ abstract class Account
      */
     public static function saveStatus()
     {
-        $denys = [];
+        self::$denys = [];
         foreach (self::getTypes() as $k => $v) {
-            if (empty($v['status'])) $denys[] = $k;
+            if (empty($v['status'])) self::$denys[] = $k;
         }
-        return sysdata('plugin.account.denys', $denys);
+        return sysdata('plugin.account.denys', self::$denys);
     }
 }

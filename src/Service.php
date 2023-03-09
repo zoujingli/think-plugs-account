@@ -32,7 +32,7 @@ class Service extends Plugin
                 'name' => '用户管理',
                 'subs' => [
                     ['name' => '用户账号管理', 'icon' => 'layui-icon layui-icon-user', 'node' => "{$name}/master/index"],
-                    ['name' => '用户终端管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$name}/device/index"],
+                    ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$name}/device/index"],
                 ],
             ],
         ];

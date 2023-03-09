@@ -1,9 +1,23 @@
 <form action="{:sysuri()}" autocomplete="off" class="layui-form layui-form-pane form-search" method="get" onsubmit="return false">
 
     <div class="layui-form-item layui-inline">
-        <label class="layui-form-label">用户手机</label>
+        <label class="layui-form-label">用户编号</label>
         <label class="layui-input-inline">
-            <input class="layui-input" name="phone" placeholder="请输入用户手机" value="{$get.phone|default=''}">
+            <input class="layui-input" name="code" placeholder="请输入用户编号" value="{$get.code|default=''}">
+        </label>
+    </div>
+
+    <div class="layui-form-item layui-inline">
+        <label class="layui-form-label">绑定手机</label>
+        <label class="layui-input-inline">
+            <input class="layui-input" name="phone" placeholder="请输入绑定手机" value="{$get.phone|default=''}">
+        </label>
+    </div>
+
+    <div class="layui-form-item layui-inline">
+        <label class="layui-form-label">绑定邮箱</label>
+        <label class="layui-input-inline">
+            <input class="layui-input" name="email" placeholder="请输入绑定邮箱" value="{$get.email|default=''}">
         </label>
     </div>
 
@@ -52,15 +66,17 @@
             data.forEach(function (item, index) {
                 data[index] = [
                     {v: item.id, t: 'n'},
+                    item.code || '-',
                     item.username || '-',
                     item.nickname || '-',
                     item.phone || '-',
+                    item.email || '-',
                     item.create_time || '',
                 ];
             });
 
             // 设置表头内容
-            data.unshift(['ID', '用户姓名', '用户昵称', '绑定手机', '创建时间']);
+            data.unshift(['ID', '用户编号', '用户姓名', '用户昵称', '绑定手机', '绑定邮箱', '绑定时间']);
 
             // 自动计算列序
             var lastCol = layui.excel.numToTitle((function (count, idx) {
@@ -96,7 +112,7 @@
             });
 
             // 设置表格行宽高，需要设置最后的行或列宽高，否则部分不生效 ？？？
-            var rowsC = {1: 33}, colsC = {A: 60, B: 80, C: 80, E: 80};
+            var rowsC = {1: 33}, colsC = {A: 60, B: 110, C: 80, E: 80};
             rowsC[data.length] = 28, colsC[lastCol] = 160;
             this.options.extend = {
                 '!rows': layui.excel.makeRowConfig(rowsC, 28), // 设置每行高度，默认 33

@@ -174,7 +174,7 @@ class AccountAccess implements AccountInterface
             unset($data['extra']);
         }
         if ($user->isEmpty()) {
-            do $data['code'] = $this->grenCode();
+            do $data['code'] = $this->generateUserCode();
             while (PluginAccountUser::mk()->where(['code' => $data['code']])->findOrEmpty()->isExists());
         }
         if ($user->save($data + $map) && $user->isExists()) {
@@ -214,7 +214,7 @@ class AccountAccess implements AccountInterface
     public function recode(): array
     {
         if ($this->bind->isExists() && ($user = $this->bind->user()->findOrEmpty())->isExists()) {
-            do $data = ['code' => $this->grenCode()];
+            do $data = ['code' => $this->generateUserCode()];
             while (PluginAccountUser::mk()->where($data)->findOrEmpty()->isExists());
             $user->save($data);
         }
@@ -300,11 +300,11 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 生成随机编号
+     * 生成用户随机编号
      * @return string
      */
-    private function grenCode(): string
+    private function generateUserCode(): string
     {
-        return 'U' . CodeExtend::random(15);
+        return 'U' . CodeExtend::uniqidNumber(15);
     }
 }

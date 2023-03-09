@@ -30,7 +30,9 @@
                         return showTableImage(d.headimg);
                     }
                 },
+                {field: 'code', title: '用户编号', minWidth: 100, align: 'center', templet: '<div>{{d.code||"-"}}</div>'},
                 {field: 'phone', title: '绑定手机', minWidth: 110, align: 'center', templet: '<div>{{d.phone||"-"}}</div>'},
+                {field: 'email', title: '绑定邮箱', minWidth: 110, align: 'center', templet: '<div>{{d.email||"-"}}</div>'},
                 {field: 'username', title: '用户姓名', minWidth: 100, align: 'center', templet: '<div>{{d.username||"-"}}</div>'},
                 {field: 'nickname', title: '用户昵称', minWidth: 100, align: 'center', templet: '<div>{{d.nickname||"-"}}</div>'},
                 {field: 'status', title: '账号状态', align: 'center', minWidth: 110, templet: '#StatusSwitchTpl'},

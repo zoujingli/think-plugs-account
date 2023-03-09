@@ -1,6 +1,21 @@
 <form action="{:sysuri()}" autocomplete="off" class="layui-form layui-form-pane form-search" method="get" onsubmit="return false">
 
     <div class="layui-form-item layui-inline">
+        <label class="layui-form-label">终端类型</label>
+        <div class="layui-input-inline">
+            <select class="layui-select" name="utype">
+                <option value="">-- 全部 --</option>
+                {foreach $types as $k=>$v}
+                {if isset($get.utype) and $v.field eq $get.utype}
+                <option selected value="{$k}">{$v.name}</option>
+                {else}
+                <option value="{$k}">{$v.name}</option>
+                {/if}{/foreach}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-inline">
         <label class="layui-form-label">用户手机</label>
         <label class="layui-input-inline">
             <input class="layui-input" name="phone" placeholder="请输入用户手机" value="{$get.phone|default=''}">
@@ -11,6 +26,13 @@
         <label class="layui-form-label">用户姓名</label>
         <label class="layui-input-inline">
             <input class="layui-input" name="username" placeholder="请输入用户姓名" value="{$get.username|default=''}">
+        </label>
+    </div>
+
+    <div class="layui-form-item layui-inline">
+        <label class="layui-form-label">用户昵称</label>
+        <label class="layui-input-inline">
+            <input class="layui-input" name="nickname" placeholder="请输入用户昵称" value="{$get.nickname|default=''}">
         </label>
     </div>
 
@@ -30,7 +52,7 @@
     </div>
 
     <div class="layui-form-item layui-inline">
-        <label class="layui-form-label">绑定时间</label>
+        <label class="layui-form-label">首次登录</label>
         <div class="layui-input-inline">
             <input class="layui-input" data-date-range name="create_at" placeholder="请选择绑定时间" value="{$get.create_at|default=''}">
         </div>
@@ -52,15 +74,17 @@
             data.forEach(function (item, index) {
                 data[index] = [
                     {v: item.id, t: 'n'},
+                    item.type_name || item.type || '',
                     item.username || '-',
                     item.nickname || '-',
                     item.phone || '-',
+                    (item.user || {}).code || '-',
                     item.create_time || '',
                 ];
             });
 
             // 设置表头内容
-            data.unshift(['ID', '用户姓名', '用户昵称', '绑定手机', '创建时间']);
+            data.unshift(['ID', '终端类型', '用户姓名', '用户昵称', '绑定手机', '关联账号', '首次登录']);
 
             // 自动计算列序
             var lastCol = layui.excel.numToTitle((function (count, idx) {

@@ -24,14 +24,14 @@ use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 
 /**
- * 用户子账号管理
+ * 终端用户管理
  * Class Device
  * @package plugin\account\controller\user
  */
 class Device extends Controller
 {
     /**
-     * 用户子账号管理
+     * 终端用户管理
      * @auth true
      * @menu true
      * @throws \think\db\exception\DataNotFoundException
@@ -42,8 +42,10 @@ class Device extends Controller
     {
         $this->type = $this->get['type'] ?? 'index';
         PluginAccountBind::mQuery()->layTable(function () {
-            $this->title = '用户子账号管理';
+            $this->title = '终端用户管理';
+            $this->types = Account::getTypes(1);
         }, function (QueryHelper $query) {
+            $query->with('user')->equal('type#utype')->like('phone,nickname,username,create_time');
             $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
         });
     }
@@ -62,7 +64,7 @@ class Device extends Controller
     }
 
     /**
-     * 配置终端通道
+     * 配置终端类型
      * @auth true
      * @return void
      * @throws \think\db\exception\DataNotFoundException
@@ -88,7 +90,7 @@ class Device extends Controller
     }
 
     /**
-     * 修改子用户状态
+     * 修改用户状态
      * @auth true
      */
     public function state()

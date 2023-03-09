@@ -2,14 +2,14 @@
 
 {block name="button"}
 <!--{if auth("types")}-->
-<button data-modal="{:url('types')}" data-width="420px" class='layui-btn layui-btn-sm layui-btn-primary'>配置通道</button>
+<button data-modal="{:url('types')}" data-width="420px" data-title="终端类型配置" class='layui-btn layui-btn-sm layui-btn-primary'>终端类型</button>
 <!--{/if}-->
 {/block}
 
 {block name="content"}
 <div class="layui-tab layui-tab-card">
     <ul class="layui-tab-title">
-        {foreach ['index'=>'用户管理','recycle'=>'回 收 站'] as $k=>$v}{if isset($type) and $type eq $k}
+        {foreach ['index'=>'终端用户管理','recycle'=>'回 收 站'] as $k=>$v}{if isset($type) and $type eq $k}
         <li data-open="{:url('index')}?type={$k}" class="layui-this">{$v}</li>
         {else}
         <li data-open="{:url('index')}?type={$k}">{$v}</li>
@@ -40,9 +40,14 @@
                 {field: 'phone', title: '绑定手机', minWidth: 110, align: 'center', templet: '<div>{{d.phone||"-"}}</div>'},
                 {field: 'username', title: '用户姓名', minWidth: 100, align: 'center', templet: '<div>{{d.username||"-"}}</div>'},
                 {field: 'nickname', title: '用户昵称', minWidth: 100, align: 'center', templet: '<div>{{d.nickname||"-"}}</div>'},
+                {
+                    field: 'id', title: '关联账号', minWidth: 100, align: 'center', templet: function (d) {
+                        return d.user ? d.user.code : '临时账号';
+                    }
+                },
                 {field: 'status', title: '账号状态', align: 'center', minWidth: 110, templet: '#StatusSwitchTpl'},
-                {field: 'create_time', title: '绑定时间', align: 'center', minWidth: 170, sort: true},
-                {toolbar: '#toolbar', title: '操作面板', align: 'center', minWidth: 150, fixed: 'right'}
+                {field: 'create_time', title: '首次登录', align: 'center', minWidth: 170, sort: true},
+                {toolbar: '#toolbar', field: 'id', title: '操作面板', align: 'center', minWidth: 150, fixed: 'right'}
             ]]
         });
 
