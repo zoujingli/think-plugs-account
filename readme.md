@@ -19,14 +19,14 @@
 
 ### 话术解析
 
-1. 账号调度器 **Account**，用于创建账号实例对象，处理部分基础数据；
-2. 账号接口类型 **Account::IOSAPP**，子账号及请求接口的绑定标识，通常以字段 **type** 传参数；
-3. 账号实例对象 **AccountInterface**，包含用户主账号、子账号的数据及对应的操作，包含接口授权等操作；
-4. 主账号编号 **unid**，对应数据表 **PlugsUser** 的 **id** 字段，用户的唯一账号，通过绑定与解绑来关联子账号；
-5. 子账号编号 **usid**，对应数据表 **PlugsBind** 的 **id** 字段，用户的其中一种登录账号，同时只能绑定一个主账号；
+1. 账号调度器 **Account**，用于创建账号管理的实例对象，以及处理部分基础数据；
+2. 账号接口类型 **Account::IOSAPP**，终端用户请求的通道标识，通常以字段 **type** 传参数；
+3. 账号实例接口 **AccountInterface**，包含用户账号编号、终端用户编号的数据及对应的操作，包含接口授权等操作；
+4. 用户账号编号 **unid**，对应数据表 **PlugsUser** 的 **id** 字段，用户的唯一账号，通过绑定与解绑来关联终端用户；
+5. 终端用户编号 **usid**，对应数据表 **PlugsBind** 的 **id** 字段，用户的其中一种登录账号，同时只能绑定一个用户账号；
 
-**注意：** 主账号 `unid` 是由子账号 `usid` 登录后，调用 `$account->bind()` 创建或绑定主账号，进而获取主账号 `unid` 值。
-子账号取消关联主账号，调用 `$account->unbind()` 即可，随后子账号又可以绑定其他主账号。
+**注意：** 用户账号编号 `unid` 是由终端用户登录后，调用 `$account->bind()` 创建或绑定用户账号，进而获取用户账号编号 `unid` 值。
+终端用户编号取消关联用户账号，调用 `$account->unbind()` 即可，随后终端用户又可以绑定其他用户账号。
 
 ### 开放接口
 
@@ -36,7 +36,7 @@
 
 ```shell
 ### 注意，仅支持在 ThinkAdmin v6.1 中使用
-composer require zoujingli/think-plugs-account
+composer require zoujingli/think-plugs-account dev-master
 ```
 
 ### 卸载插件
@@ -71,7 +71,7 @@ $user = $account->get();
 var_dump($user);
 
 // 动态注册接口通道，由插件服务类或模块 sys.php 执行注册
-Account::addType('diy', '自定义通道名称', '子账号验证字段');
+Account::addType('diy', '自定义通道名称', '终端用户编号验证字段');
 
 // 通道状态 - 禁用接口，将禁止该方式访问数据
 Account::setStatus('diy', 0);
@@ -96,8 +96,8 @@ var_dump($types);
 
 可根据下面的功能节点配置菜单及访问权限，按钮操作级别的节点未展示！
 
-* 主账号管理：`plugin-account/master/index`
-* 子账号管理：`plugin-account/device/index`
+* 用户账号管理：`plugin-account/master/index`
+* 终端用户管理：`plugin-account/device/index`
 * 用户余额管理：`plugin-account/balance/index`
 
 ### 插件数据
