@@ -36,7 +36,9 @@ abstract class Account
     const IOSAPP = 'iosapp';
     const ANDROID = 'android';
 
+    // 已禁用的账号通道
     private static $denys = null;
+    private static $cackey = 'plugin.account.denys';
 
     private static $types = [
         self::WAP     => ['name' => '手机浏览器', 'field' => 'phone', 'status' => 1],
@@ -56,7 +58,7 @@ abstract class Account
      */
     public static function mk(string $type, string $token = ''): AccountInterface
     {
-        if (self::getField($type)) {
+        if (self::field($type)) {
             $vars = ['type' => $type, 'field' => self::$types[$type]['field']];
             return app(AccountAccess::class, $vars)->init($token);
         } else {
@@ -71,7 +73,7 @@ abstract class Account
     private static function init(): array
     {
         if (is_null(self::$denys)) try {
-            self::$denys = sysdata('plugin.account.denys');
+            self::$denys = sysdata(self::$cackey);
             foreach (self::$types as $type => &$item) {
                 $item['status'] = intval(!in_array($type, self::$denys));
             }
@@ -87,10 +89,26 @@ abstract class Account
      * @param string $field
      * @return array[]
      */
-    public static function addType(string $type, string $name, string $field = 'phone'): array
+    public static function add(string $type, string $name, string $field = 'phone'): array
     {
         self::$types[$type] = ['name' => $name, 'field' => $field, 'status' => 1];
-        return self::getTypes();
+        return self::types();
+    }
+
+    /**
+     * 设置通道状态
+     * @param string $type 通道编号
+     * @param integer $status 通道状态
+     * @return bool
+     */
+    public static function set(string $type, int $status): bool
+    {
+        if (isset(self::$types[$type])) {
+            self::$types[$type]['status'] = $status;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -98,7 +116,7 @@ abstract class Account
      * @param ?int $status 指定状态
      * @return array
      */
-    public static function getTypes(?int $status = null): array
+    public static function types(?int $status = null): array
     {
         try {
             $all = [];
@@ -112,11 +130,27 @@ abstract class Account
     }
 
     /**
-     * 获取通道认证字段
+     * 保存用户通道状态
+     * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public static function save()
+    {
+        self::$denys = [];
+        foreach (self::types() as $k => $v) {
+            if (empty($v['status'])) self::$denys[] = $k;
+        }
+        return sysdata(self::$cackey, self::$denys);
+    }
+
+    /**
+     * 获取认证字段
      * @param string $type 通道编码
      * @return string
      */
-    public static function getField(string $type): string
+    public static function field(string $type): string
     {
         $types = self::init();
         if (!empty($types[$type]['status'])) {
@@ -124,37 +158,5 @@ abstract class Account
         } else {
             return '';
         }
-    }
-
-    /**
-     * 设置通道状态
-     * @param string $type 通道编号
-     * @param integer $status 通道状态
-     * @return bool
-     */
-    public static function setStatus(string $type, int $status): bool
-    {
-        if (isset(self::$types[$type])) {
-            self::$types[$type]['status'] = $status;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * 保存用户通道状态
-     * @return mixed
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
-     */
-    public static function saveStatus()
-    {
-        self::$denys = [];
-        foreach (self::getTypes() as $k => $v) {
-            if (empty($v['status'])) self::$denys[] = $k;
-        }
-        return sysdata('plugin.account.denys', self::$denys);
     }
 }

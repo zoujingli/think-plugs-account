@@ -67,7 +67,7 @@ class Wechat extends Controller
      */
     protected function initialize(): Wechat
     {
-        if ($this->field = Account::getField(static::type)) {
+        if ($this->field = Account::field(static::type)) {
             $this->wechat = WechatService::instance();
             $this->target = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
         } else {

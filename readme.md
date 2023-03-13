@@ -71,24 +71,24 @@ $user = $account->get();
 var_dump($user);
 
 // 动态注册接口通道，由插件服务类或模块 sys.php 执行注册
-Account::addType('diy', '自定义通道名称', '终端用户编号验证字段');
+Account::add('diy', '自定义通道名称', '终端用户编号验证字段');
 
 // 通道状态 - 禁用接口，将禁止该方式访问数据
-Account::setStatus('diy', 0);
+Account::set('diy', 0);
 
 // 通道状态 - 启用接口，将启用该方式访问数据
-Account::setStatus('diy', 1);
+Account::set('diy', 1);
 
 // 保存通道状态，下次访问也同样生效
-Account::saveStatus();
+Account::save();
 
 // 获取接口认证字段以及检查接口是否有效
-$field = Account::getField('diy');
+$field = Account::field('diy');
 if($field)// 接口有效
 else //接口无效
 
 // 获取全部接口
-$types = Account::getTypes();
+$types = Account::types();
 var_dump($types);
 ```
 

@@ -43,7 +43,7 @@ class Device extends Controller
         $this->type = $this->get['type'] ?? 'index';
         PluginAccountBind::mQuery()->layTable(function () {
             $this->title = '终端用户管理';
-            $this->types = Account::getTypes(1);
+            $this->types = Account::types(1);
         }, function (QueryHelper $query) {
             $query->with('user')->equal('type#utype')->like('phone,nickname,username,create_time');
             $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
@@ -57,7 +57,7 @@ class Device extends Controller
      */
     protected function _page_filter(array &$data)
     {
-        $types = Account::getTypes();
+        $types = Account::types();
         foreach ($data as &$vo) {
             $vo['type_name'] = $types[$vo['type']]['name'] ?? $vo['type'];
         }
@@ -73,15 +73,15 @@ class Device extends Controller
      */
     public function types()
     {
-        $this->types = Account::getTypes();
+        $this->types = Account::types();
         if ($this->request->isGet()) {
             $this->fetch();
         } else {
             $types = $this->request->post('types', []);
             foreach ($this->types as $k => $v) {
-                Account::setStatus($k, intval(in_array($k, $types)));
+                Account::set($k, intval(in_array($k, $types)));
             }
-            if (Account::saveStatus()) {
+            if (Account::save()) {
                 $this->success('配置保存成功！');
             } else {
                 $this->error('配置保存失败！');

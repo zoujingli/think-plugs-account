@@ -23,14 +23,14 @@ use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 
 /**
- * 用户主账号管理
+ * 用户账号管理
  * Class Master
  * @package plugin\account\controller\user
  */
 class Master extends Controller
 {
     /**
-     * 用户主账号管理
+     * 用户账号管理
      * @auth true
      * @menu true
      * @return void
@@ -42,7 +42,7 @@ class Master extends Controller
     {
         $this->type = $this->get['type'] ?? 'index';
         PluginAccountUser::mQuery()->layTable(function () {
-            $this->title = '用户主账号管理';
+            $this->title = '用户账号管理';
         }, function (QueryHelper $query) {
             $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
             $query->like('code,phone,email,username,nickname')->dateBetween('create_time');

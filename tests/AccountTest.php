@@ -10,24 +10,24 @@ class AccountTest extends TestCase
 
     public function testAddType()
     {
-        Account::addType('test', '测试接口');
-        $this->assertIsString(Account::getField('test'));
+        Account::add('test', '测试接口');
+        $this->assertIsString(Account::field('test'));
     }
 
     public function testGetTypes()
     {
-        $info = Account::getTypes();
+        $info = Account::types();
         $this->assertIsArray($info);
     }
 
     public function testChangeType()
     {
-        $field = Account::getField('web');
+        $field = Account::field('web');
         $this->assertNotEmpty($field);
 
-        Account::setStatus('web', 0);
+        Account::set('web', 0);
 
-        $field = Account::getField('web');
+        $field = Account::field('web');
         $this->assertEmpty($field);
 
         try {

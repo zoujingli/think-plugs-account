@@ -22,7 +22,7 @@ use think\admin\Model;
 use think\model\relation\HasMany;
 
 /**
- * 用户主账号模型
+ * 用户账号模型
  * @class PluginAccountUser
  * @package plugin\account\model
  */

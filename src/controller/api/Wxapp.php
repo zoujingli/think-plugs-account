@@ -66,7 +66,7 @@ class Wxapp extends Controller
             'appsecret'  => $opt['appkey'] ?? '',
             'cache_path' => syspath('runtime/wechat'),
         ];
-        if (!($this->field = Account::getField($this->type))) {
+        if (!($this->field = Account::field($this->type))) {
             $this->error(sprintf('接口通道 [%s] 未开通！', static::type));
         }
     }
