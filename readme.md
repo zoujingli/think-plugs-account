@@ -107,8 +107,6 @@ var_dump($types);
 * 插件-账号-授权 `plugin_account_auth`
 * 插件-账号-终端 `plugin_account_bind`
 * 插件-账号-资料 `plugin_account_user`
-* 插件-账号-地址 `plugin_account_user_address`
-* 插件-账号-余额 `plugin_account_user_balance`
 
 ### 版权说明
 
