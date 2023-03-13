@@ -98,7 +98,6 @@ var_dump($types);
 
 * 用户账号管理：`plugin-account/master/index`
 * 终端用户管理：`plugin-account/device/index`
-* 用户余额管理：`plugin-account/balance/index`
 
 ### 插件数据
 
