@@ -35,6 +35,9 @@
 ### 安装插件
 
 ```shell
+### 安装前建议更新其他组件
+composer update --optimize-autoloader
+
 ### 注意，仅支持在 ThinkAdmin v6.1 中使用
 composer require zoujingli/think-plugs-account dev-master
 ```
