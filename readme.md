@@ -57,14 +57,14 @@ use plugin\account\service\Account;
 //   如果传 TOKEN 的情况下且 opneid 与原 openid 不匹配会报错，用 try 捕获异常
 //   注意，每次调用 Account::mk() 都会创建新的调度器，设置 set 和 get 方法的 rejwt 参数可返回接口令牌 
 $account = Account::mk(Account::WXAPP, TOKEN='');
-$user = $account->set(['openid'=>"OPENID", 'phone'=>'13888888888']);
+$user = $account->set(['openid'=>'OPENID', 'phone'=>'13888888888']);
 var_dump($user);
 
 // 列如更新用户手机号，通过上面的操作已绑定账号，可以直接设置
 $account->set(['phone'=>'1399999999']);
 
 // 设置额外的扩展数据，数据库没有字段，不需要做为查询条件的字段
-$account->set(['extra'=>['desc'=>'用户描述','sex'=>'男']]);
+$account->set(['extra'=>['desc'=>'用户描述', 'sex'=>'男']]);
 
 // 获取用户资料，无账号返回空数组
 $user = $account->get();
@@ -98,6 +98,7 @@ var_dump($types);
 
 * 用户账号管理：`plugin-account/master/index`
 * 终端用户管理：`plugin-account/device/index`
+* 用户余额管理：`plugin-account/balance/index`
 
 ### 插件数据
 
@@ -105,7 +106,7 @@ var_dump($types);
 
 * 插件-账号-授权 `plugin_account_auth`
 * 插件-账号-终端 `plugin_account_bind`
-* 插件-账号-资料 `plugin_account_user`
+* 插件-账号-用户 `plugin_account_user`
 
 ### 版权说明
 

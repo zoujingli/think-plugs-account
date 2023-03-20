@@ -69,7 +69,7 @@ class AccountTest extends TestCase
         $info = $account->bind(['phone' => '138888888888'], ['username' => 'UserName' . uniqid()]);
         $this->assertNotEmpty($info['user'], '账号绑定成功！');
 
-        $info = $account->unbind();
+        $info = $account->unBind();
         $this->assertEmpty($info['user'], '账号解绑成功！');
     }
 }

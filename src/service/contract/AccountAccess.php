@@ -193,7 +193,7 @@ class AccountAccess implements AccountInterface
      * @return array
      * @throws \think\admin\Exception
      */
-    public function unbind(): array
+    public function unBind(): array
     {
         if ($this->bind->isEmpty()) {
             throw new Exception('终端账号不存在！');
@@ -205,6 +205,24 @@ class AccountAccess implements AccountInterface
             ]);
         }
         return $this->get();
+    }
+
+    /**
+     * 判断绑定主账号
+     * @return boolean
+     */
+    public function isBind(): bool
+    {
+        return $this->bind->isExists() && $this->bind->user()->findOrEmpty()->isExists();
+    }
+
+    /**
+     * 判断是否空账号
+     * @return boolean
+     */
+    public function isNull(): bool
+    {
+        return $this->bind->isEmpty();
     }
 
     /**

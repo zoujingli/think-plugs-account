@@ -53,7 +53,7 @@ abstract class Account
      * 创建账号实例
      * @param string $type 通道编号
      * @param string $token 认证令牌
-     * @return mixed|AccountInterface
+     * @return AccountInterface
      * @throws \think\admin\Exception
      */
     public static function mk(string $type, string $token = ''): AccountInterface

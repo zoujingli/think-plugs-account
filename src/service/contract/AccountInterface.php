@@ -59,7 +59,19 @@ interface AccountInterface
      * 解绑主账号
      * @return array
      */
-    public function unbind(): array;
+    public function unBind(): array;
+
+    /**
+     * 判断绑定主账号
+     * @return boolean
+     */
+    public function isBind(): bool;
+
+    /**
+     * 判断是否空账号
+     * @return bool
+     */
+    public function isNull(): bool;
 
     /**
      * 刷新账号序号

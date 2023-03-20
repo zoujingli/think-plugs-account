@@ -42,7 +42,7 @@ class Center extends Auth
      */
     public function unbind()
     {
-        $this->account->unbind();
+        $this->account->unBind();
         $this->success('解除关联成功！', $this->account->get());
     }
 }
