@@ -35,11 +35,11 @@
 ### 安装插件
 
 ```shell
-### 安装前建议更新其他组件
+### 安装前建议尝试更新所有组件
 composer update --optimize-autoloader
 
-### 注意，仅支持在 ThinkAdmin v6.1 中使用
-composer require zoujingli/think-plugs-account dev-master
+### 注意，插件仅支持在 ThinkAdmin v6.1 中使用
+composer require zoujingli/think-plugs-account --optimize-autoloader
 ```
 
 ### 卸载插件
@@ -101,6 +101,7 @@ var_dump($types);
 
 * 用户账号管理：`plugin-account/master/index`
 * 终端用户管理：`plugin-account/device/index`
+* 用户余额管理：`plugin-account/balance/index`
 
 ### 插件数据
 

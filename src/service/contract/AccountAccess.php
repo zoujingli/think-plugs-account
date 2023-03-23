@@ -64,6 +64,12 @@ class AccountAccess implements AccountInterface
     protected $field;
 
     /**
+     * 是否JWT模式
+     * @var boolean
+     */
+    protected $isjwt;
+
+    /**
      * 令牌有效时间
      * @var integer
      */
@@ -91,9 +97,10 @@ class AccountAccess implements AccountInterface
     /**
      * 初始化通道
      * @param string $token
+     * @param boolean $isjwt
      * @return AccountInterface
      */
-    public function init(string $token = ''): AccountInterface
+    public function init(string $token = '', bool $isjwt = true): AccountInterface
     {
         if (!empty($token)) {
             $map = ['type' => $this->type, 'token' => $token];
@@ -103,6 +110,7 @@ class AccountAccess implements AccountInterface
             $this->auth = PluginAccountAuth::mk();
             $this->bind = PluginAccountBind::mk();
         }
+        $this->isjwt = $isjwt;
         return $this;
     }
 
@@ -147,10 +155,10 @@ class AccountAccess implements AccountInterface
         $data = $this->bind->hidden(['password'])->toArray();
         if ($this->bind->isExists()) {
             $data['user'] = $this->bind->user()->findOrEmpty()->toArray();
-            if ($rejwt) $data['token'] = JwtExtend::getToken([
+            if ($rejwt) $data['token'] = $this->isjwt ? JwtExtend::getToken([
                 'type'  => $this->auth->getAttr('type'),
-                'token' => $this->auth->getAttr('token'),
-            ]);
+                'token' => $this->auth->getAttr('token')
+            ]) : $this->auth->getAttr('token');
         }
         return $data;
     }

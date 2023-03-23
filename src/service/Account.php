@@ -21,6 +21,7 @@ namespace plugin\account\service;
 use plugin\account\service\contract\AccountAccess;
 use plugin\account\service\contract\AccountInterface;
 use think\admin\Exception;
+use think\admin\extend\JwtExtend;
 
 /**
  * 用户账号调度器
@@ -53,14 +54,19 @@ abstract class Account
      * 创建账号实例
      * @param string $type 通道编号
      * @param string $token 认证令牌
+     * @param boolean $isjwt 是否JWT模式
      * @return AccountInterface
      * @throws \think\admin\Exception
      */
-    public static function mk(string $type, string $token = ''): AccountInterface
+    public static function mk(string $type, string $token = '', bool $isjwt = true): AccountInterface
     {
+        if ($isjwt && strlen($token) > 32) {
+            $result = JwtExtend::verifyToken($token);
+            if (isset($result['token'])) $token = $result['token'];
+        }
         if (self::field($type)) {
             $vars = ['type' => $type, 'field' => self::$types[$type]['field']];
-            return app(AccountAccess::class, $vars)->init($token);
+            return app(AccountAccess::class, $vars)->init($token, $isjwt);
         } else {
             throw new Exception("用户通道 [{$type}] 未定义或参数错误");
         }

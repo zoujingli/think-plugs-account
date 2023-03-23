@@ -43,9 +43,10 @@ interface AccountInterface
     /**
      * 初始化通道
      * @param string $token
+     * @param boolean $isjwt
      * @return \plugin\account\service\contract\AccountInterface
      */
-    public function init(string $token = ''): AccountInterface;
+    public function init(string $token = '', bool $isjwt = true): AccountInterface;
 
     /**
      * 绑定主账号
