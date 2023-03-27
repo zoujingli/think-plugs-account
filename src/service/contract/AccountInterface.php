@@ -75,6 +75,19 @@ interface AccountInterface
     public function isNull(): bool;
 
     /**
+     * 获取关联终端
+     * @return array
+     */
+    public function allBind(): array;
+
+    /**
+     * 解除终端关联
+     * @param integer $usid 终端编号
+     * @return array
+     */
+    public function delBind(int $usid): array;
+
+    /**
      * 刷新账号序号
      * @return array
      */

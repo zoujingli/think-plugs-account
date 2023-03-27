@@ -63,6 +63,9 @@ abstract class Account
         if ($isjwt && strlen($token) > 32) {
             $result = JwtExtend::verifyToken($token);
             if (isset($result['token'])) $token = $result['token'];
+            if (isset($result['type']) && $result['type'] !== $type) {
+                throw new Exception("请求 Token 与接口通道不匹配！");
+            }
         }
         if (self::field($type)) {
             $vars = ['type' => $type, 'field' => self::$types[$type]['field']];

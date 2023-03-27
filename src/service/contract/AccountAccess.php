@@ -234,6 +234,39 @@ class AccountAccess implements AccountInterface
     }
 
     /**
+     * 获取关联终端
+     * @return array
+     */
+    public function allBind(): array
+    {
+        try {
+            if ($this->isNull()) return [];
+            if ($this->isBind() && ($unid = $this->bind->getAttr('unid'))) {
+                $map = ['unid' => $unid, 'deleted' => 0];
+                return PluginAccountBind::mk()->where($map)->select()->toArray();
+            } else {
+                return [$this->bind->refresh()->toArray()];
+            }
+        } catch (\Exception $exception) {
+            return [];
+        }
+    }
+
+    /**
+     * 解除终端关联
+     * @param integer $usid 终端编号
+     * @return array
+     */
+    public function delBind(int $usid): array
+    {
+        if ($this->isBind() && ($unid = $this->bind->getAttr('unid'))) {
+            $map = ['id' => $usid, 'unid' => $unid];
+            PluginAccountBind::mk()->where($map)->update(['unid' => 0]);
+        }
+        return $this->devices();
+    }
+
+    /**
      * 刷新账号序号
      * @return array
      */
