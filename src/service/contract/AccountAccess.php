@@ -263,7 +263,7 @@ class AccountAccess implements AccountInterface
             $map = ['id' => $usid, 'unid' => $unid];
             PluginAccountBind::mk()->where($map)->update(['unid' => 0]);
         }
-        return $this->devices();
+        return $this->allBind();
     }
 
     /**
