@@ -136,7 +136,7 @@ class InstallAccount extends Migrator
         ])
             ->addColumn('code', 'string', ['limit' => 16, 'default' => '', 'null' => true, 'comment' => '用户编号'])
             ->addColumn('phone', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '用户手机'])
-            ->addColumn('email', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '用户账号'])
+            ->addColumn('email', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '用户邮箱'])
             ->addColumn('unionid', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => 'UnionID'])
             ->addColumn('username', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => '用户姓名'])
             ->addColumn('nickname', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '用户昵称'])

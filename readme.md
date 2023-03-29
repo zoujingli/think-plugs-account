@@ -73,6 +73,25 @@ $account->set(['extra'=>['desc'=>'用户描述', 'sex'=>'男']]);
 $user = $account->get();
 var_dump($user);
 
+// 以上插件仅仅是注册终端账号，也就是临时账号
+// 下面我们通过 bind 操作，绑定或创建用户账号（ 主账号 ）
+$user = $account->bind(['phone'=>'1399999999'],['uesrname'=>"会员用户"]);
+var_dump($user); // $user['user'] 是主账号信息
+
+// 解除该终端账号关联主账号
+$user = $account->unBind();
+var_dump($user); // 此处之后不会再有 $user['user'] 信息
+
+// 判断终端账号是否为空，也就是还没有调用 set 访问或 init 失败
+$user = $account->isNull();
+
+// 获取接口 Token 信息
+$user = $account->get(true);
+var_dump($user); // $user['token'] 即为 JwtToken 值，接口 header 传 api-token 字段
+
+// 判断终端账号是否已经关联主账号
+$account->isBind();
+
 // 动态注册接口通道，由插件服务类或模块 sys.php 执行注册
 Account::add('diy', '自定义通道名称', '终端用户编号验证字段');
 
