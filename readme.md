@@ -92,6 +92,12 @@ var_dump($user); // $user['token'] 即为 JwtToken 值，接口 header 传 api-t
 // 判断终端账号是否已经关联主账号
 $account->isBind();
 
+// 获取主账号关联所有的终端账号
+$binds = $account->allBind();
+
+// 通过终端USID取消关联主账号
+$account->delBind($usid);
+
 // 动态注册接口通道，由插件服务类或模块 sys.php 执行注册
 Account::add('diy', '自定义通道名称', '终端用户编号验证字段');
 
