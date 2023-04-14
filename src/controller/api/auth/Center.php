@@ -22,7 +22,7 @@ use plugin\account\controller\api\Auth;
 
 /**
  * 用户账号管理
- * Class Center
+ * @class Center
  * @package plugin\account\controller\api\auth
  */
 class Center extends Auth

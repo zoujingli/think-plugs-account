@@ -18,7 +18,6 @@ declare (strict_types=1);
 
 namespace plugin\account\controller\api;
 
-use Exception;
 use plugin\account\service\Account;
 use think\admin\Controller;
 use think\exception\HttpResponseException;
@@ -54,9 +53,7 @@ class Wxapp extends Controller
 
     /**
      * 接口服务初始化
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\admin\Exception
      */
     protected function initialize()
     {
@@ -84,7 +81,7 @@ class Wxapp extends Controller
             $this->success('授权换取成功！', Account::mk(static::type)->set($data, true));
         } catch (HttpResponseException $exception) {
             throw $exception;
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             trace_file($exception);
             $this->error("数据处理失败，{$exception->getMessage()}");
         }
@@ -114,7 +111,7 @@ class Wxapp extends Controller
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             trace_file($exception);
             $this->error("数据处理失败，{$exception->getMessage()}");
         }
@@ -141,7 +138,7 @@ class Wxapp extends Controller
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             trace_file($exception);
             $this->error("换取授权失败，{$exception->getMessage()}");
         }
@@ -168,7 +165,7 @@ class Wxapp extends Controller
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             trace_file($exception);
             $this->error($exception->getMessage());
         }
@@ -185,7 +182,7 @@ class Wxapp extends Controller
             $this->success('获取直播列表成功！', $list);
         } catch (HttpResponseException $exception) {
             throw $exception;
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             trace_file($exception);
             $this->error($exception->getMessage());
         }
@@ -207,7 +204,7 @@ class Wxapp extends Controller
             $this->success('获取回放视频成功！', $result);
         } catch (HttpResponseException $exception) {
             throw $exception;
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             trace_file($exception);
             $this->error($exception->getMessage());
         }

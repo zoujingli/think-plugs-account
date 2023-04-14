@@ -33,7 +33,6 @@ class Master extends Controller
      * 用户账号管理
      * @auth true
      * @menu true
-     * @return void
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
@@ -59,5 +58,14 @@ class Master extends Controller
             'status.in:0,1'  => '状态值范围异常！',
             'status.require' => '状态值不能为空！',
         ]));
+    }
+
+    /**
+     * 删除主账号
+     * @auth true
+     */
+    public function remove()
+    {
+        PluginAccountUser::mDelete();
     }
 }

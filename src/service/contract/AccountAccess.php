@@ -155,10 +155,10 @@ class AccountAccess implements AccountInterface
         $data = $this->bind->hidden(['password'])->toArray();
         if ($this->bind->isExists()) {
             $data['user'] = $this->bind->user()->findOrEmpty()->toArray();
-            if ($rejwt) $data['token'] = $this->isjwt ? JwtExtend::getToken([
+            if ($rejwt) $data['token'] = $this->isjwt ? JwtExtend::token([
                 'type'  => $this->auth->getAttr('type'),
                 'token' => $this->auth->getAttr('token')
-            ]) : $this->auth->getAttr('token');
+            ], null, null, false) : $this->auth->getAttr('token');
         }
         return $data;
     }

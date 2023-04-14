@@ -67,9 +67,7 @@ class Device extends Controller
      * 配置终端类型
      * @auth true
      * @return void
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\admin\Exception
      */
     public function types()
     {

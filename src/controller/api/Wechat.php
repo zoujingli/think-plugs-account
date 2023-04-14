@@ -28,6 +28,7 @@ use think\Response;
  * Class Wechat
  * @package plugin\account\controller\api
  * @example 域名请修改为自己的地址，放到网页代码合适位置
+ *
  * <meta name="referrer" content="always">
  * <script referrerpolicy="unsafe-url" src="https://your.domain.com/data/api.wechat/oauth?mode=1"></script>
  *
@@ -81,9 +82,6 @@ class Wechat extends Controller
      * @throws \WeChat\Exceptions\InvalidResponseException
      * @throws \WeChat\Exceptions\LocalCacheException
      * @throws \think\admin\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
      */
     public function jssdk()
     {
@@ -96,9 +94,6 @@ class Wechat extends Controller
      * @throws \WeChat\Exceptions\InvalidResponseException
      * @throws \WeChat\Exceptions\LocalCacheException
      * @throws \think\admin\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
      */
     public function oauth(): Response
     {

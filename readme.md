@@ -5,17 +5,13 @@
 [![Total Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/downloads)](https://packagist.org/packages/zoujingli/think-plugs-account)
 [![Monthly Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/d/monthly)](https://packagist.org/packages/zoujingli/think-plugs-account)
 [![Daily Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/d/daily)](https://packagist.org/packages/zoujingli/think-plugs-account)
-[![PHP Version Require](http://poser.pugx.org/zoujingli/think-plugs-account/require/php)](https://packagist.org/packages/zoujingli/think-plugs-account)
-[![ThinkAdmin VIP 授权](https://img.shields.io/badge/license-VIP%20授权-blueviolet.svg)](https://thinkadmin.top/vip-introduce)
-
-**插件正在开发测试中，不建议使用 ！！！**
+[![PHP Version](https://doc.thinkadmin.top/static/icon/php-7.1.svg)](https://thinkadmin.top)
+[![License](https://doc.thinkadmin.top/static/icon/license-vip.svg)](https://thinkadmin.top/vip-introduce)
 
 用户账号管理插件，此插件为[会员尊享插件](https://thinkadmin.top/vip-introduce)，未授权不可商用。
 
 此插件目前数据接口已支持 **微信服务号** 和 **微信小程序** 两种登录授权，其他登录方式需要等短信验证插件上线再开放。
 账号服务层数据已支持 **微信服务号**、**微信小程序**、**安卓APP程序**、**苹果IOS程序**、**手机网页端**、**电脑网页端** 以及 **自定义方式**。
-
-目前账号体系尚处在测试阶段，在未清楚其工作原理时建议不要直接使用！
 
 ### 话术解析
 
@@ -80,7 +76,7 @@ var_dump($user); // $user['user'] 是主账号信息
 
 // 解除该终端账号关联主账号
 $user = $account->unBind();
-var_dump($user); // 此处之后不会再有 $user['user'] 信息
+var_dump($user); // 此处不会再有 $user['user'] 信息
 
 // 判断终端账号是否为空，也就是还没有调用 set 访问或 init 失败
 $user = $account->isNull();
@@ -90,13 +86,14 @@ $user = $account->get(true);
 var_dump($user); // $user['token'] 即为 JwtToken 值，接口 header 传 api-token 字段
 
 // 判断终端账号是否已经关联主账号
-$account->isBind();
+$is = $account->isBind();
+var_dump($is);
 
-// 获取主账号关联所有的终端账号
+// 获取主账号关联的所有终端账号
 $binds = $account->allBind();
 
-// 通过终端USID取消关联主账号
-$account->delBind($usid);
+// 通过终端USID取消其关联主账号
+$binds = $account->delBind($usid);
 
 // 动态注册接口通道，由插件服务类或模块 sys.php 执行注册
 Account::add('diy', '自定义通道名称', '终端用户编号验证字段');
@@ -126,7 +123,6 @@ var_dump($types);
 
 * 用户账号管理：`plugin-account/master/index`
 * 终端用户管理：`plugin-account/device/index`
-* 用户余额管理：`plugin-account/balance/index`
 
 ### 插件数据
 
@@ -134,7 +130,7 @@ var_dump($types);
 
 * 插件-账号-授权 `plugin_account_auth`
 * 插件-账号-终端 `plugin_account_bind`
-* 插件-账号-用户 `plugin_account_user`
+* 插件-账号-资料 `plugin_account_user`
 
 ### 版权说明
 

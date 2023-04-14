@@ -61,7 +61,7 @@ abstract class Account
     public static function mk(string $type, string $token = '', bool $isjwt = true): AccountInterface
     {
         if ($isjwt && strlen($token) > 32) {
-            $result = JwtExtend::verifyToken($token);
+            $result = JwtExtend::verify($token);
             if (isset($result['token'])) $token = $result['token'];
             if (isset($result['type']) && $result['type'] !== $type) {
                 throw new Exception("请求 Token 与接口通道不匹配！");
@@ -141,9 +141,7 @@ abstract class Account
     /**
      * 保存用户通道状态
      * @return mixed
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\admin\Exception
      */
     public static function save()
     {

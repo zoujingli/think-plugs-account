@@ -25,7 +25,7 @@ use think\exception\HttpResponseException;
 
 /**
  * 接口授权抽象类
- * Class Auth
+ * @class Auth
  * @package plugin\account\controller\api
  */
 abstract class Auth extends Controller
@@ -55,8 +55,8 @@ abstract class Auth extends Controller
     {
         try {
             // 读取用户账号数据
-            $auther = JwtExtend::verifyToken($this->request->header('api-token', ''));
-            $this->account = Account::mk($auther['type'] ?? '-', $auther['token'] ?? '-');
+            $data = JwtExtend::verify($this->request->header('api-token', ''));
+            $this->account = Account::mk($data['type'] ?? '-', $data['token'] ?? '-');
             $bind = $this->account->check();
             $this->usid = intval($bind['id'] ?? 0);
             $this->unid = intval($bind['unid'] ?? 0);
@@ -73,9 +73,7 @@ abstract class Auth extends Controller
     protected function checkUserStatus()
     {
         $bind = $this->account->get();
-        if (empty($bind['status'])) {
-            $this->error('终端用户已被冻结！');
-        }
+        if (empty($bind['status'])) $this->error('终端用户已被冻结！');
         if (!empty($bind['user']) && empty($this->bind['user']['status'])) {
             $this->error('用户账号已被冻结！');
         }

@@ -20,16 +20,11 @@
         $('#UserTable').layTable({
             even: true, height: 'full',
             sort: {field: 'sort desc,id', type: 'desc'},
-            where: {type: '{$type|default="index"}'},
             cols: [[
                 {field: 'id', hide: true},
                 {checkbox: true, fixed: true},
                 {field: 'sort', title: '排序权重', width: 100, align: 'center', sort: true, templet: '#SortInputTpl'},
-                {
-                    field: 'headimg', title: '头像', width: 60, align: 'center', templet: function (d) {
-                        return showTableImage(d.headimg);
-                    }
-                },
+                {field: 'headimg', title: '头像', width: 60, align: 'center', templet: '<div>{{-showTableImage(d.headimg,true)}}</div>'},
                 {field: 'code', title: '用户编号', minWidth: 100, align: 'center', templet: '<div>{{d.code||"-"}}</div>'},
                 {field: 'phone', title: '绑定手机', minWidth: 110, align: 'center', templet: '<div>{{d.phone||"-"}}</div>'},
                 {field: 'email', title: '绑定邮箱', minWidth: 110, align: 'center', templet: '<div>{{d.email||"-"}}</div>'},
@@ -37,7 +32,7 @@
                 {field: 'nickname', title: '用户昵称', minWidth: 100, align: 'center', templet: '<div>{{d.nickname||"-"}}</div>'},
                 {field: 'status', title: '账号状态', align: 'center', minWidth: 110, templet: '#StatusSwitchTpl'},
                 {field: 'create_time', title: '绑定时间', align: 'center', minWidth: 170, sort: true},
-                {toolbar: '#toolbar', title: '操作面板', align: 'center', minWidth: 150, fixed: 'right'}
+                {toolbar: '#toolbar', title: '操作面板', align: 'center', minWidth: 100, fixed: 'right'}
             ]]
         });
 
