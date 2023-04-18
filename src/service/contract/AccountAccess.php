@@ -79,7 +79,7 @@ class AccountAccess implements AccountInterface
      * 测试专用TOKEN
      * @var string
      */
-    protected $tester = 'tester';
+    const tester = 'tester';
 
     /**
      * 通道构造方法
@@ -187,7 +187,7 @@ class AccountAccess implements AccountInterface
         }
         if ($user->save($data + $map) && $user->isExists()) {
             $this->bind->save(['unid' => $user['id']]);
-            $this->app->event->trigger('ThinkPlugsAccountBind', [
+            $this->app->event->trigger('PluginAccountBind', [
                 'unid' => intval($user['id']), 'usid' => intval($this->bind->getAttr('id')),
             ]);
             return $this->get();
@@ -208,7 +208,7 @@ class AccountAccess implements AccountInterface
         }
         if (($unid = $this->bind->getAttr('unid')) > 0) {
             $this->bind->save(['unid' => 0]);
-            $this->app->event->trigger('ThinkPlugsAccountUnbind', [
+            $this->app->event->trigger('PluginAccountUnbind', [
                 'unid' => $unid, 'usid' => $this->bind->getAttr('id'),
             ]);
         }
@@ -290,7 +290,7 @@ class AccountAccess implements AccountInterface
         if ($this->bind->isEmpty()) {
             throw new Exception('登录令牌无效，请重新登录！', 401);
         }
-        if ($this->auth->getAttr('token') !== $this->tester) {
+        if ($this->auth->getAttr('token') !== static::tester) {
             if ($this->expire > 0 && $this->auth->getAttr('time') < time()) {
                 throw new Exception('登录认证超时，请重新登录！', 502);
             }
@@ -306,7 +306,7 @@ class AccountAccess implements AccountInterface
     public function token(int $unid): AccountInterface
     {
         // 清理无效令牌
-        PluginAccountAuth::mk()->where('token', '<>', $this->tester)->whereBetween('time', [1, time()])->delete();
+        PluginAccountAuth::mk()->where('token', '<>', self::tester)->whereBetween('time', [1, time()])->delete();
 
         // 刷新登录令牌
         if ($this->auth->isEmpty()) {

@@ -20,7 +20,6 @@ namespace plugin\account\controller\api;
 
 use plugin\account\service\Account;
 use think\admin\Controller;
-use think\admin\extend\JwtExtend;
 use think\exception\HttpResponseException;
 
 /**
@@ -30,6 +29,13 @@ use think\exception\HttpResponseException;
  */
 abstract class Auth extends Controller
 {
+
+    /**
+     * 接口类型
+     * @var string
+     */
+    protected $type;
+
     /**
      * 主账号编号
      * @var integer
@@ -54,12 +60,15 @@ abstract class Auth extends Controller
     protected function initialize()
     {
         try {
+            // 获取请求令牌内容
+            $token = $this->request->header('api-token', '');
+            if (empty($token)) $this->error("请求TOKEN不能为空！");
             // 读取用户账号数据
-            $data = JwtExtend::verify($this->request->header('api-token', ''));
-            $this->account = Account::mk($data['type'] ?? '-', $data['token'] ?? '-');
+            $this->account = Account::mk('', $token);
             $bind = $this->account->check();
             $this->usid = intval($bind['id'] ?? 0);
             $this->unid = intval($bind['unid'] ?? 0);
+            $this->type = strval($bind['type'] ?? '');
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -68,14 +77,22 @@ abstract class Auth extends Controller
     }
 
     /**
-     * 显示用户禁用提示
+     * 检查用户状态
+     * @param boolean $isBind
+     * @return void
      */
-    protected function checkUserStatus()
+    protected function checkUserStatus(bool $isBind = true)
     {
         $bind = $this->account->get();
-        if (empty($bind['status'])) $this->error('终端用户已被冻结！');
-        if (!empty($bind['user']) && empty($this->bind['user']['status'])) {
-            $this->error('用户账号已被冻结！');
+        if (empty($bind['status'])) {
+            $this->error('终端用户已被冻结！');
+        } elseif ($isBind) {
+            if (empty($bind['user'])) {
+                $this->error('请完善账号资料！');
+            }
+            if (empty($bind['user']['status'])) {
+                $this->error('账号已被冻结！');
+            }
         }
     }
 }

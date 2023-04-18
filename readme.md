@@ -8,6 +8,8 @@
 [![PHP Version](https://doc.thinkadmin.top/static/icon/php-7.1.svg)](https://thinkadmin.top)
 [![License](https://doc.thinkadmin.top/static/icon/license-vip.svg)](https://thinkadmin.top/vip-introduce)
 
+**注意：** 该插件测试版有数据库结构变化，未生成补丁，需要全新安装！]
+
 用户账号管理插件，此插件为[会员尊享插件](https://thinkadmin.top/vip-introduce)，未授权不可商用。
 
 此插件目前数据接口已支持 **微信服务号** 和 **微信小程序** 两种登录授权，其他登录方式需要等短信验证插件上线再开放。

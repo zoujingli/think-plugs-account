@@ -28,7 +28,7 @@ use WeMini\Qrcode;
 
 /**
  * 微信小程序入口
- * Class Wxapp
+ * @class Wxapp
  * @package plugin\account\controller\api
  */
 class Wxapp extends Controller
@@ -63,7 +63,7 @@ class Wxapp extends Controller
             'appsecret'  => $opt['appkey'] ?? '',
             'cache_path' => syspath('runtime/wechat'),
         ];
-        if (!($this->field = Account::field($this->type))) {
+        if (!($this->field = Account::field(static::type))) {
             $this->error(sprintf('接口通道 [%s] 未开通！', static::type));
         }
     }

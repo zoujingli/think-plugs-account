@@ -18,7 +18,6 @@ declare (strict_types=1);
 
 namespace plugin\account\model;
 
-use think\admin\Model;
 use think\model\relation\HasMany;
 use think\model\relation\HasOne;
 
@@ -27,7 +26,7 @@ use think\model\relation\HasOne;
  * @class PluginAccountBind
  * @package plugin\account\model
  */
-class PluginAccountBind extends Model
+class PluginAccountBind extends Abs
 {
     /**
      * 关联主账号
@@ -65,25 +64,5 @@ class PluginAccountBind extends Model
     public function getExtraAttr($value): array
     {
         return empty($value) ? [] : (is_string($value) ? json_decode($value, true) : $value);
-    }
-
-    /**
-     * 格式化输出时间
-     * @param mixed $value
-     * @return string
-     */
-    public function getCreateTimeAttr($value): string
-    {
-        return format_datetime($value);
-    }
-
-    /**
-     * 格式化输出时间
-     * @param mixed $value
-     * @return string
-     */
-    public function getUpdateTimeAttr($value): string
-    {
-        return format_datetime($value);
     }
 }

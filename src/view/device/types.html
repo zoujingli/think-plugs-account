@@ -2,7 +2,7 @@
     <div class="layui-card-body padding-left-40">
 
         {foreach $types as $k=>$v}
-        <label class="think-checkbox">
+        <label class="think-checkbox" data-width style="width:120px" title="{$v.name|lang}">
             {empty name='v.status'}
             <input type="checkbox" name="types[]" value='{$k}' lay-ignore> {$v.name|lang}
             {else}

@@ -25,7 +25,7 @@ use think\Response;
 
 /**
  * 微信服务号入口
- * Class Wechat
+ * @class Wechat
  * @package plugin\account\controller\api
  * @example 域名请修改为自己的地址，放到网页代码合适位置
  *
@@ -51,16 +51,16 @@ class Wechat extends Controller
     private $field;
 
     /**
-     * 微信调度器
-     * @var WechatService
-     */
-    private $wechat;
-
-    /**
      * 接口原地址
      * @var string
      */
     private $target;
+
+    /**
+     * 微信调度器
+     * @var WechatService
+     */
+    private $wechat;
 
     /**
      * 控制器初始化
@@ -98,7 +98,7 @@ class Wechat extends Controller
     public function oauth(): Response
     {
         $script = [];
-        $result = $this->wechat->getWebOauthInfo($this->target, input('mode', 1), false);
+        $result = $this->wechat->getWebOauthInfo($this->target, (int)input('mode', 1), false);
         if (empty($result['openid'])) {
             $script[] = 'alert("WeChat Oauth failed.")';
         } else {
@@ -111,11 +111,11 @@ class Wechat extends Controller
             $result['userinfo'] = Account::mk(static::type)->set($data, true);
             // 返回数据给前端
             $script[] = "window.WeChatOpenid='{$result['openid']}'";
-            $script[] = 'window.WeChatFansInfo=' . json_encode($result['fansinfo'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-            $script[] = 'window.WeChatUserInfo=' . json_encode($result['userinfo'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            $script[] = 'window.WeChatFansInfo=' . json_encode($result['fansinfo'], 64 | 128 | 256);
+            $script[] = 'window.WeChatUserInfo=' . json_encode($result['userinfo'], 64 | 128 | 256);
         }
         $script[] = '';
-        return Response::create(join(";\n", $script))->contentType('application/x-javascript');
+        return Response::create(join(";\n", $script))->contentType('application/javascript');
     }
 
     /**

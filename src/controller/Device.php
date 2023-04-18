@@ -25,7 +25,7 @@ use think\admin\helper\QueryHelper;
 
 /**
  * 终端用户管理
- * Class Device
+ * @class Device
  * @package plugin\account\controller\user
  */
 class Device extends Controller

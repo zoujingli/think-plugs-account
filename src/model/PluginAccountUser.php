@@ -18,7 +18,6 @@ declare (strict_types=1);
 
 namespace plugin\account\model;
 
-use think\admin\Model;
 use think\model\relation\HasMany;
 
 /**
@@ -26,7 +25,7 @@ use think\model\relation\HasMany;
  * @class PluginAccountUser
  * @package plugin\account\model
  */
-class PluginAccountUser extends Model
+class PluginAccountUser extends Abs
 {
 
     /**
@@ -58,23 +57,4 @@ class PluginAccountUser extends Model
         return empty($value) ? [] : (is_string($value) ? json_decode($value, true) : $value);
     }
 
-    /**
-     * 格式化输出时间
-     * @param mixed $value
-     * @return string
-     */
-    public function getCreateTimeAttr($value): string
-    {
-        return format_datetime($value);
-    }
-
-    /**
-     * 格式化输出时间
-     * @param mixed $value
-     * @return string
-     */
-    public function getUpdateTimeAttr($value): string
-    {
-        return format_datetime($value);
-    }
 }

@@ -18,6 +18,7 @@ declare (strict_types=1);
 
 namespace plugin\account\service;
 
+use plugin\account\model\PluginAccountAuth;
 use plugin\account\service\contract\AccountAccess;
 use plugin\account\service\contract\AccountInterface;
 use think\admin\Exception;
@@ -39,7 +40,7 @@ abstract class Account
 
     // 已禁用的账号通道
     private static $denys = null;
-    private static $cackey = 'plugin.account.denys';
+    private static $cacheKey = 'plugin.account.denys';
 
     private static $types = [
         self::WAP     => ['name' => '手机浏览器', 'field' => 'phone', 'status' => 1],
@@ -60,11 +61,17 @@ abstract class Account
      */
     public static function mk(string $type, string $token = '', bool $isjwt = true): AccountInterface
     {
-        if ($isjwt && strlen($token) > 32) {
+        if ($token === AccountAccess::tester) {
+            if (empty($type)) {
+                $auth = PluginAccountAuth::mk()->where(['token' => $token])->findOrEmpty();
+                if ($auth->isEmpty()) throw new Exception('测试账号不存在！');
+                $type = $auth->getAttr('type');
+            }
+        } elseif ($isjwt && strlen($token) > 32) {
             $result = JwtExtend::verify($token);
             if (isset($result['token'])) $token = $result['token'];
             if (isset($result['type']) && $result['type'] !== $type) {
-                throw new Exception("请求 Token 与接口通道不匹配！");
+                throw new Exception("请求 TOKEN 与接口通道不匹配！");
             }
         }
         if (self::field($type)) {
@@ -82,7 +89,7 @@ abstract class Account
     private static function init(): array
     {
         if (is_null(self::$denys)) try {
-            self::$denys = sysdata(self::$cackey);
+            self::$denys = sysdata(self::$cacheKey);
             foreach (self::$types as $type => &$item) {
                 $item['status'] = intval(!in_array($type, self::$denys));
             }
@@ -149,7 +156,7 @@ abstract class Account
         foreach (self::types() as $k => $v) {
             if (empty($v['status'])) self::$denys[] = $k;
         }
-        return sysdata(self::$cackey, self::$denys);
+        return sysdata(self::$cacheKey, self::$denys);
     }
 
     /**
@@ -164,6 +171,27 @@ abstract class Account
             return $types[$type]['field'] ?? '';
         } else {
             return '';
+        }
+    }
+
+    /**
+     * 解析请求令牌
+     * @param string $token
+     * @param ?string $type
+     * @return AccountInterface
+     * @throws \think\admin\Exception
+     */
+    public static function token(string $token = '', ?string &$type = null): AccountInterface
+    {
+        if ($token === AccountAccess::tester) {
+            $map = ['token' => $token];
+            empty($type) or ($map['type'] = $type);
+            $auth = PluginAccountAuth::mk()->where($map)->findOrEmpty();
+            if ($auth->isEmpty()) throw new Exception('测试账号不存在！');
+            return static::mk($type = $auth->getAttr('type'), $auth->getAttr('token'));
+        } else {
+            $data = JwtExtend::verify($token);
+            return static::mk($type = $data['type'] ?? '-', $data['token'] ?? '-');
         }
     }
 }

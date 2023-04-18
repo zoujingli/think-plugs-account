@@ -18,54 +18,70 @@ declare (strict_types=1);
 
 namespace plugin\account\controller;
 
-use plugin\account\model\PluginAccountUser;
+use plugin\account\model\PluginAccountMsms;
+use plugin\account\service\Message as MessageService;
+use plugin\account\service\message\Alisms;
 use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 
 /**
- * 用户账号管理
- * @class Master
- * @package plugin\account\controller\user
+ * 短信记录管理
+ * @class Message
+ * @package plugin\account\controller
  */
-class Master extends Controller
+class Message extends Controller
 {
+
     /**
-     * 用户账号管理
+     * 缓存配置名称
+     * @var string
+     */
+    protected $smskey;
+
+    /**
+     * 初始化控制器
+     * @return void
+     */
+    protected function initialize()
+    {
+        parent::initialize();
+        $this->smskey = 'plugin.account.smscfg';
+    }
+
+    /**
+     * 短信发送记录
      * @auth true
      * @menu true
+     * @return void
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
      */
     public function index()
     {
-        $this->type = $this->get['type'] ?? 'index';
-        PluginAccountUser::mQuery()->layTable(function () {
-            $this->title = '用户账号管理';
+        PluginAccountMsms::mQuery()->layTable(function () {
+            $this->title = '短信记录管理';
         }, function (QueryHelper $query) {
-            $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
-            $query->like('code,phone,email,username,nickname')->dateBetween('create_time');
+            $query->equal('status')->like('smsid,scene,phone')->dateBetween('create_time');
         });
     }
 
     /**
-     * 修改主账号状态
+     * 修改短信配置
      * @auth true
+     * @return void
+     * @throws \think\admin\Exception
      */
-    public function state()
+    public function config()
     {
-        PluginAccountUser::mSave($this->_vali([
-            'status.in:0,1'  => '状态值范围异常！',
-            'status.require' => '状态值不能为空！',
-        ]));
-    }
-
-    /**
-     * 删除主账号
-     * @auth true
-     */
-    public function remove()
-    {
-        PluginAccountUser::mDelete();
+        if ($this->request->isGet()) {
+            $this->vo = sysdata($this->smskey);
+            $this->scenes = MessageService::$scenes;
+            $this->regions = Alisms::regions();
+            $this->fetch();
+        } else {
+            sysdata($this->smskey, $this->request->post());
+            $this->success('修改配置成功！');
+        }
     }
 }

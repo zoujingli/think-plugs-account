@@ -18,7 +18,6 @@ declare (strict_types=1);
 
 namespace plugin\account\model;
 
-use think\admin\Model;
 use think\model\relation\HasOne;
 
 /**
@@ -26,7 +25,7 @@ use think\model\relation\HasOne;
  * @class PluginAccountAuth
  * @package plugin\account\model
  */
-class PluginAccountAuth extends Model
+class PluginAccountAuth extends Abs
 {
     /**
      * 关联子账号

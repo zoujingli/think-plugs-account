@@ -16,26 +16,35 @@
 
 declare (strict_types=1);
 
-namespace plugin\account;
+namespace plugin\account\model;
 
-use think\admin\Plugin;
+use think\admin\Model;
 
-class Service extends Plugin
+/**
+ * 模型抽象类
+ * @class Abs
+ * @package plugin\account\model
+ */
+abstract class Abs extends Model
 {
-    protected $package = 'zoujingli/think-plugs-account';
 
-    public static function menu(): array
+    /**
+     * 格式化输出时间
+     * @param mixed $value
+     * @return string
+     */
+    public function getCreateTimeAttr($value): string
     {
-        $name = app(static::class)->appName;
-        return [
-            [
-                'name' => '用户管理',
-                'subs' => [
-                    ['name' => '用户账号管理', 'icon' => 'layui-icon layui-icon-user', 'node' => "{$name}/master/index"],
-                    ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$name}/device/index"],
-                    ['name' => '手机短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$name}/message/index"],
-                ],
-            ],
-        ];
+        return format_datetime($value);
+    }
+
+    /**
+     * 格式化输出时间
+     * @param mixed $value
+     * @return string
+     */
+    public function getUpdateTimeAttr($value): string
+    {
+        return format_datetime($value);
     }
 }

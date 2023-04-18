@@ -16,26 +16,8 @@
 
 declare (strict_types=1);
 
-namespace plugin\account;
+namespace plugin\account\model;
 
-use think\admin\Plugin;
-
-class Service extends Plugin
+class PluginAccountMsms extends Abs
 {
-    protected $package = 'zoujingli/think-plugs-account';
-
-    public static function menu(): array
-    {
-        $name = app(static::class)->appName;
-        return [
-            [
-                'name' => '用户管理',
-                'subs' => [
-                    ['name' => '用户账号管理', 'icon' => 'layui-icon layui-icon-user', 'node' => "{$name}/master/index"],
-                    ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$name}/device/index"],
-                    ['name' => '手机短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$name}/message/index"],
-                ],
-            ],
-        ];
-    }
 }

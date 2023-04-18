@@ -12,6 +12,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.1",
+    "ext-curl": "*",
     "ext-json": "*",
     "zoujingli/think-install": "^1.0|dev-master",
     "zoujingli/think-library": "^6.1|v6.0.x-dev",
