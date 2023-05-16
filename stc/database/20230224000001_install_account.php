@@ -29,7 +29,6 @@ class InstallAccount extends Migrator
     {
         $this->_create_plugin_account_auth();
         $this->_create_plugin_account_bind();
-        $this->_create_plugin_account_msms();
         $this->_create_plugin_account_user();
     }
 
@@ -111,50 +110,6 @@ class InstallAccount extends Migrator
             ->addIndex('unionid', ['name' => 'idx_plugin_account_bind_unionid'])
             ->addIndex('deleted', ['name' => 'idx_plugin_account_bind_deleted'])
             ->addIndex('create_time', ['name' => 'idx_plugin_account_bind_create_time'])
-            ->create();
-
-        // 修改主键长度
-        $this->table($table)->changeColumn('id', 'integer', ['limit' => 11, 'identity' => true]);
-    }
-
-    /**
-     * 创建数据对象
-     * @class PluginAccountMsms
-     * @table plugin_account_msms
-     * @return void
-     */
-    private function _create_plugin_account_msms()
-    {
-
-        // 当前数据表
-        $table = 'plugin_account_msms';
-
-        // 存在则跳过
-        if ($this->hasTable($table)) return;
-
-        // 创建数据表
-        $this->table($table, [
-            'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '插件-账号-短信',
-        ])
-            ->addColumn('uuid', 'biginteger', ['limit' => 20, 'default' => 0, 'null' => false, 'comment' => '账号编号'])
-            ->addColumn('usid', 'biginteger', ['limit' => 20, 'default' => 0, 'null' => false, 'comment' => '终端编号'])
-            ->addColumn('type', 'string', ['limit' => 100, 'default' => '', 'null' => true, 'comment' => '短信类型'])
-            ->addColumn('scene', 'string', ['limit' => 100, 'default' => '', 'null' => true, 'comment' => '业务场景'])
-            ->addColumn('smsid', 'string', ['limit' => 100, 'default' => '', 'null' => true, 'comment' => '消息编号'])
-            ->addColumn('phone', 'string', ['limit' => 100, 'default' => '', 'null' => true, 'comment' => '目标手机'])
-            ->addColumn('result', 'string', ['limit' => 512, 'default' => '', 'null' => true, 'comment' => '返回结果'])
-            ->addColumn('params', 'string', ['limit' => 512, 'default' => '', 'null' => true, 'comment' => '短信内容'])
-            ->addColumn('status', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '短信状态(0失败,1成功)'])
-            ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '创建时间'])
-            ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
-            ->addIndex('type', ['name' => 'idx_plugin_account_msms_type'])
-            ->addIndex('uuid', ['name' => 'idx_plugin_account_msms_uuid'])
-            ->addIndex('phone', ['name' => 'idx_plugin_account_msms_phone'])
-            ->addIndex('status', ['name' => 'idx_plugin_account_msms_status'])
-            ->addIndex('usid', ['name' => 'idx_plugin_account_msms_usid'])
-            ->addIndex('scene', ['name' => 'idx_plugin_account_msms_scene'])
-            ->addIndex('create_time', ['name' => 'idx_plugin_account_msms_create_time'])
-            ->addIndex('smsid', ['name' => 'idx_plugin_account_msms_smsid'])
             ->create();
 
         // 修改主键长度
