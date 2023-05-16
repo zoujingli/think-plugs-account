@@ -8,7 +8,7 @@
 [![PHP Version](https://doc.thinkadmin.top/static/icon/php-7.1.svg)](https://thinkadmin.top)
 [![License](https://doc.thinkadmin.top/static/icon/license-vip.svg)](https://thinkadmin.top/vip-introduce)
 
-**注意：** 该插件测试版有数据库结构变化，未生成补丁，需要全新安装！]
+**注意：** 该插件测试版有数据库结构变化，未生成补丁，需要全新安装！
 
 用户账号管理插件，此插件为[会员尊享插件](https://thinkadmin.top/vip-introduce)，未授权不可商用。
 
@@ -30,14 +30,21 @@
 
 通过用户登录接口，换取 **JWT-TOKEN** 内容，之后接口需要在每次请求的头部 **header** 加上 **Api-Token** 字段并带上之后获取到的值。
 
+**接口文档：** https://documenter.getpostman.com/view/4518676/2s93eeRpDr
+
+**特别注意：** 调用接口时后台系统未启动 `Session` 中间键，建议使用 `Cache & unid` 缓存数据。
+
 ### 安装插件
 
 ```shell
 ### 安装前建议尝试更新所有组件
 composer update --optimize-autoloader
 
-### 注意，插件仅支持在 ThinkAdmin v6.1 中使用
+### 安装稳定版本 ( 插件仅支持在 ThinkAdmin v6.1 中使用 )
 composer require zoujingli/think-plugs-account --optimize-autoloader
+
+### 安装测试版本（ 插件仅支持在 ThinkAdmin v6.1 中使用 ）
+composer require zoujingli/think-plugs-account dev-master --optimize-autoloader
 ```
 
 ### 卸载插件
@@ -125,6 +132,7 @@ var_dump($types);
 
 * 用户账号管理：`plugin-account/master/index`
 * 终端用户管理：`plugin-account/device/index`
+* 手机短信管理：`plugin-account/message/index`
 
 ### 插件数据
 
@@ -132,6 +140,7 @@ var_dump($types);
 
 * 插件-账号-授权 `plugin_account_auth`
 * 插件-账号-终端 `plugin_account_bind`
+* 插件-账号-短信 `plugin_account_msms`
 * 插件-账号-资料 `plugin_account_user`
 
 ### 版权说明

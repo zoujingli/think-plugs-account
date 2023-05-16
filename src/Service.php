@@ -20,20 +20,39 @@ namespace plugin\account;
 
 use think\admin\Plugin;
 
+/**
+ * 插件注册服务
+ * @class Service
+ * @package plugin\account
+ */
 class Service extends Plugin
 {
+    /**
+     * 定义插件名称
+     * @var string
+     */
+    protected $appName = '多端账号管理';
+
+    /**
+     * 定义安装包名
+     * @var string
+     */
     protected $package = 'zoujingli/think-plugs-account';
 
+    /**
+     * 定义插件菜单
+     * @return array[]
+     */
     public static function menu(): array
     {
-        $name = app(static::class)->appName;
+        $code = app(static::class)->appCode;
         return [
             [
                 'name' => '用户管理',
                 'subs' => [
-                    ['name' => '用户账号管理', 'icon' => 'layui-icon layui-icon-user', 'node' => "{$name}/master/index"],
-                    ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$name}/device/index"],
-                    ['name' => '手机短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$name}/message/index"],
+                    ['name' => '用户账号管理', 'icon' => 'layui-icon layui-icon-user', 'node' => "{$code}/master/index"],
+                    ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$code}/device/index"],
+                    ['name' => '手机短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$code}/message/index"],
                 ],
             ],
         ];

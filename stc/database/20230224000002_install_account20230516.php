@@ -62,12 +62,12 @@ class InstallAccount20230516 extends Migrator
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
             ->addIndex('type', ['name' => 'idx_plugin_account_msms_type'])
             ->addIndex('uuid', ['name' => 'idx_plugin_account_msms_uuid'])
-            ->addIndex('phone', ['name' => 'idx_plugin_account_msms_phone'])
-            ->addIndex('status', ['name' => 'idx_plugin_account_msms_status'])
             ->addIndex('usid', ['name' => 'idx_plugin_account_msms_usid'])
+            ->addIndex('phone', ['name' => 'idx_plugin_account_msms_phone'])
             ->addIndex('scene', ['name' => 'idx_plugin_account_msms_scene'])
-            ->addIndex('create_time', ['name' => 'idx_plugin_account_msms_create_time'])
             ->addIndex('smsid', ['name' => 'idx_plugin_account_msms_smsid'])
+            ->addIndex('status', ['name' => 'idx_plugin_account_msms_status'])
+            ->addIndex('create_time', ['name' => 'idx_plugin_account_msms_create_time'])
             ->create();
 
         // 修改主键长度
