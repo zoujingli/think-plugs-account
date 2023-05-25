@@ -64,8 +64,8 @@ class InstallAccount20230516 extends Migrator
             ->addIndex('uuid', ['name' => 'idx_plugin_account_msms_uuid'])
             ->addIndex('usid', ['name' => 'idx_plugin_account_msms_usid'])
             ->addIndex('phone', ['name' => 'idx_plugin_account_msms_phone'])
-            ->addIndex('scene', ['name' => 'idx_plugin_account_msms_scene'])
             ->addIndex('smsid', ['name' => 'idx_plugin_account_msms_smsid'])
+            ->addIndex('scene', ['name' => 'idx_plugin_account_msms_scene'])
             ->addIndex('status', ['name' => 'idx_plugin_account_msms_status'])
             ->addIndex('create_time', ['name' => 'idx_plugin_account_msms_create_time'])
             ->create();
