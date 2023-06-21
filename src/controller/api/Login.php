@@ -44,7 +44,7 @@ class Login extends Controller
             'verify.require' => '验证码不能为空！'
         ]);
         if (Account::field($data['type']) !== 'phone') {
-            $this->error('该接口不支持Phone登录！');
+            $this->error('该接口不支持手机号登录！');
         }
         if (Message::checkVerifyCode($data['verify'], $data['phone'])) {
             Message::clearVerifyCode($data['phone']);
@@ -66,11 +66,11 @@ class Login extends Controller
         $data = $this->_vali([
             'phone.mobile'   => '手机号格式错误！',
             'phone.require'  => '手机号不能为空！',
-            'image.require'  => '图形验证码不能为空！',
+            'verify.require' => '图形验证码不能为空！',
             'uniqid.require' => '图形唯一码不能为空！',
         ]);
         // 检查图形验证码
-        if (!CaptchaService::instance()->check($data['image'], $data['uniqid'])) {
+        if (!CaptchaService::instance()->check($data['verify'], $data['uniqid'])) {
             $this->error('图形码验证失败！');
         }
         // 发送手机短信验证码
@@ -84,7 +84,7 @@ class Login extends Controller
      */
     public function image()
     {
-        $image = CaptchaService::instance()->initialize();
+        $image = CaptchaService::instance()->initialize(['charset' => '0123456789']);
         $captcha = ['image' => $image->getData(), 'uniqid' => $image->getUniqid()];
         $this->success('生成验证码成功', $captcha);
     }

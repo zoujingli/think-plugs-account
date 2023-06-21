@@ -91,6 +91,7 @@ class InstallAccount extends Migrator
             ->addColumn('unid', 'biginteger', ['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '会员编号'])
             ->addColumn('type', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '终端类型'])
             ->addColumn('phone', 'string', ['limit' => 30, 'default' => '', 'null' => true, 'comment' => '绑定手机'])
+            ->addColumn('appid', 'string', ['limit' => 30, 'default' => '', 'null' => true, 'comment' => 'APPID'])
             ->addColumn('openid', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => 'OPENID'])
             ->addColumn('unionid', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => 'UnionID'])
             ->addColumn('headimg', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '用户头像'])
@@ -110,6 +111,8 @@ class InstallAccount extends Migrator
             ->addIndex('unionid', ['name' => 'idx_plugin_account_bind_unionid'])
             ->addIndex('deleted', ['name' => 'idx_plugin_account_bind_deleted'])
             ->addIndex('create_time', ['name' => 'idx_plugin_account_bind_create_time'])
+            ->addIndex('phone', ['name' => 'idx_plugin_account_bind_phone'])
+            ->addIndex('appid', ['name' => 'idx_plugin_account_bind_appid'])
             ->create();
 
         // 修改主键长度
@@ -152,6 +155,7 @@ class InstallAccount extends Migrator
             ->addColumn('deleted', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '删除状态(0未删,1已删)'])
             ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '注册时间'])
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
+            ->addIndex('code', ['name' => 'idx_plugin_account_user_code'])
             ->addIndex('phone', ['name' => 'idx_plugin_account_user_phone'])
             ->addIndex('email', ['name' => 'idx_plugin_account_user_email'])
             ->addIndex('unionid', ['name' => 'idx_plugin_account_user_unionid'])
@@ -163,7 +167,6 @@ class InstallAccount extends Migrator
             ->addIndex('status', ['name' => 'idx_plugin_account_user_status'])
             ->addIndex('deleted', ['name' => 'idx_plugin_account_user_deleted'])
             ->addIndex('create_time', ['name' => 'idx_plugin_account_user_create_time'])
-            ->addIndex('code', ['name' => 'idx_plugin_account_user_code'])
             ->create();
 
         // 修改主键长度

@@ -45,16 +45,10 @@ class Wechat extends Controller
     const type = Account::WECHAT;
 
     /**
-     * 唯一绑定字段
-     * @var string
-     */
-    private $field;
-
-    /**
      * 接口原地址
      * @var string
      */
-    private $target;
+    private $location;
 
     /**
      * 微信调度器
@@ -64,17 +58,15 @@ class Wechat extends Controller
 
     /**
      * 控制器初始化
-     * @return $this
      */
-    protected function initialize(): Wechat
+    protected function initialize()
     {
-        if ($this->field = Account::field(static::type)) {
+        if (Account::field(static::type)) {
             $this->wechat = WechatService::instance();
-            $this->target = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
+            $this->location = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
         } else {
             $this->error(sprintf('接口通道 [%s] 未开通！', static::type));
         }
-        return $this;
     }
 
     /**
@@ -85,7 +77,7 @@ class Wechat extends Controller
      */
     public function jssdk()
     {
-        $this->success('获取签名参数', $this->wechat->getWebJssdkSign($this->target));
+        $this->success('获取签名参数', $this->wechat->getWebJssdkSign($this->location));
     }
 
     /**
@@ -98,13 +90,13 @@ class Wechat extends Controller
     public function oauth(): Response
     {
         $script = [];
-        $result = $this->wechat->getWebOauthInfo($this->target, (int)input('mode', 1), false);
+        $result = $this->wechat->getWebOauthInfo($this->location, (int)input('mode', 1), false);
         if (empty($result['openid'])) {
             $script[] = 'alert("WeChat Oauth failed.")';
         } else {
             $fans = $result['fansinfo'] ?? [];
             // 筛选保存数据
-            $data = [$this->field => $result['openid'], 'extra' => $fans];
+            $data = ['appid' => WechatService::getAppid(), 'openid' => $result['openid'], 'extra' => $fans];
             if (isset($fans['unionid'])) $data['unionid'] = $fans['unionid'];
             if (isset($fans['nickname'])) $data['nickname'] = $fans['nickname'];
             if (isset($fans['headimgurl'])) $data['headimg'] = $fans['headimgurl'];

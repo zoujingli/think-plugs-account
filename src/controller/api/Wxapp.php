@@ -37,13 +37,7 @@ class Wxapp extends Controller
      * 接口通道类型
      * @var string
      */
-    const type = Account::WXAPP;
-
-    /**
-     * 唯一绑定字段
-     * @var string
-     */
-    private $field;
+    protected const type = Account::WXAPP;
 
     /**
      * 小程序配置参数
@@ -52,32 +46,37 @@ class Wxapp extends Controller
     private $params;
 
     /**
-     * 接口服务初始化
+     * 接口初始化
      * @throws \think\admin\Exception
      */
     protected function initialize()
     {
-        $opt = sysdata('wxapp');
-        $this->params = [
-            'appid'      => $opt['appid'] ?? '',
-            'appsecret'  => $opt['appkey'] ?? '',
-            'cache_path' => syspath('runtime/wechat'),
-        ];
-        if (!($this->field = Account::field(static::type))) {
+        if (Account::field(static::type)) {
+            $wxapp = sysdata('wxapp');
+            $this->params = [
+                'appid'      => $wxapp['appid'] ?? '',
+                'appsecret'  => $wxapp['appkey'] ?? '',
+                'cache_path' => syspath('runtime/wechat'),
+            ];
+        } else {
             $this->error(sprintf('接口通道 [%s] 未开通！', static::type));
         }
     }
 
     /**
-     * 换取授权会话
+     * 换取会话
      */
     public function session()
     {
         try {
             $input = $this->_vali(['code.require' => '凭证编码不能为空！']);
             [$openid, $unionid, $sesskey] = $this->applySesskey($input['code']);
-            $data = [$this->field => $openid, 'session_key' => $sesskey];
-            if (!empty($unionid)) $data['unionid'] = $unionid;
+            $data = [
+                'appid'       => $this->params['appid'],
+                'openid'      => $openid,
+                'unionid'     => $unionid,
+                'session_key' => $sesskey,
+            ];
             $this->success('授权换取成功！', Account::mk(static::type)->set($data, true));
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -101,8 +100,13 @@ class Wxapp extends Controller
             [$openid, $unionid, $input['session_key']] = $this->applySesskey($input['code']);
             $result = Crypt::instance($this->params)->decode($input['iv'], $input['session_key'], $input['encrypted']);
             if (is_array($result) && isset($result['avatarUrl']) && isset($result['nickName'])) {
-                $data = [$this->field => $openid, 'nickname' => $result['nickName'], 'headimg' => $result['avatarUrl']];
-                if (!empty($unionid)) $data['unionid'] = $unionid;
+                $data = [
+                    'appid'    => $this->params['appid'],
+                    'openid'   => $openid,
+                    'unionid'  => $unionid,
+                    'headimg'  => $result['avatarUrl'],
+                    'nickname' => $result['nickName'],
+                ];
                 $this->success('数据解密成功！', Account::mk(static::type)->set($data, true));
             } elseif (is_array($result)) {
                 $this->success('数据解密成功！', $result);
@@ -131,7 +135,7 @@ class Wxapp extends Controller
             }
             $result = Crypt::instance($this->params)->session($code);
             if (isset($result['openid']) && isset($result['session_key'])) {
-                $this->app->cache->set($code, $result, 600);
+                $this->app->cache->set($code, $result, 7200);
                 return [$result['openid'], $result['unionid'] ?? '', $result['session_key']];
             } else {
                 $this->error($result['errmsg'] ?? '授权换取失败，请稍候再试！');

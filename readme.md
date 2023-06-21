@@ -8,12 +8,18 @@
 [![PHP Version](https://doc.thinkadmin.top/static/icon/php-7.1.svg)](https://thinkadmin.top)
 [![License](https://doc.thinkadmin.top/static/icon/license-vip.svg)](https://thinkadmin.top/vip-introduce)
 
-**注意：** 该插件测试版有数据库结构变化，未生成补丁，需要全新安装！
+**注意：** 该插件测试版有数据库结构变化，未生成升级补丁，每次更新需要全新安装！
 
-用户账号管理插件，此插件为[会员尊享插件](https://thinkadmin.top/vip-introduce)，未授权不可商用。
+多端账号中心，此插件为[会员尊享插件](https://thinkadmin.top/vip-introduce)，未授权不可商用。
 
-此插件目前数据接口已支持 **微信服务号** 和 **微信小程序** 两种登录授权，其他登录方式需要等短信验证插件上线再开放。
+此插件目前数据接口已支持 **微信服务号** 和 **微信小程序** 两种登录授权，其他方式使用短信验证登录。
 账号服务层数据已支持 **微信服务号**、**微信小程序**、**安卓APP程序**、**苹果IOS程序**、**手机网页端**、**电脑网页端** 以及 **自定义方式**。
+
+通过 **微信服务号** 和 **微信小程序** 等授权方式登录后为临时用户，需要通过手机号短信验证并绑定手机号后才会成为正式用户。
+
+**大概数据模型：**
+
+`临时用户(usid)` `->` `绑定手机` `->` `正式用户(unid)`
 
 ### 话术解析
 
@@ -32,7 +38,7 @@
 
 **接口文档：** https://documenter.getpostman.com/view/4518676/2s93eeRpDr
 
-**特别注意：** 调用接口时后台系统未启动 `Session` 中间键，建议使用 `Cache & unid` 缓存数据。
+**特别注意：** 调用接口时后台接口未启动 `Session` 中间键，建议使用 `Cache & usid` 或 `Cache & unid` 作为`key`值来缓存数据。
 
 ### 安装插件
 
