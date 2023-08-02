@@ -46,8 +46,7 @@ class Login extends Controller
         if (Account::field($data['type']) !== 'phone') {
             $this->error('不支持手机登录');
         }
-        $isLogin = $data['verify'] === '123456';
-        if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
+        if (Message::checkVerifyCode($data['verify'], $data['phone'])) {
             Message::clearVerifyCode($data['phone']);
             $account = Account::mk($data['type']);
             $account->set($inset = ['phone' => $data['phone']]);
