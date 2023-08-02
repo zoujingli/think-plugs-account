@@ -59,7 +59,7 @@ class Wxapp extends Controller
                 'cache_path' => syspath('runtime/wechat'),
             ];
         } else {
-            $this->error(sprintf('接口通道 [%s] 未开通！', static::type));
+            $this->error('接口未开通');
         }
     }
 
@@ -69,7 +69,7 @@ class Wxapp extends Controller
     public function session()
     {
         try {
-            $input = $this->_vali(['code.require' => '凭证编码不能为空！']);
+            $input = $this->_vali(['code.require' => '凭证不能为空']);
             [$openid, $unionid, $sesskey] = $this->applySesskey($input['code']);
             $data = [
                 'appid'       => $this->params['appid'],
@@ -77,12 +77,12 @@ class Wxapp extends Controller
                 'unionid'     => $unionid,
                 'session_key' => $sesskey,
             ];
-            $this->success('授权换取成功！', Account::mk(static::type)->set($data, true));
+            $this->success('授权换取成功', Account::mk(static::type)->set($data, true));
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             trace_file($exception);
-            $this->error("数据处理失败，{$exception->getMessage()}");
+            $this->error("处理失败，{$exception->getMessage()}");
         }
     }
 
@@ -93,9 +93,9 @@ class Wxapp extends Controller
     {
         try {
             $input = $this->_vali([
-                'iv.require'        => '解密向量不能为空！',
-                'code.require'      => '授权CODE不能为空！',
-                'encrypted.require' => '加密内容不能为空！',
+                'iv.require'        => '向量不能为空',
+                'code.require'      => '授权不能为空',
+                'encrypted.require' => '密文不能为空',
             ]);
             [$openid, $unionid, $input['session_key']] = $this->applySesskey($input['code']);
             $result = Crypt::instance($this->params)->decode($input['iv'], $input['session_key'], $input['encrypted']);
@@ -107,11 +107,11 @@ class Wxapp extends Controller
                     'headimg'  => $result['avatarUrl'],
                     'nickname' => $result['nickName'],
                 ];
-                $this->success('数据解密成功！', Account::mk(static::type)->set($data, true));
+                $this->success('数据解密成功', Account::mk(static::type)->set($data, true));
             } elseif (is_array($result)) {
-                $this->success('数据解密成功！', $result);
+                $this->success('数据解密成功', $result);
             } else {
-                $this->error('数据处理失败，请稍候再试！');
+                $this->error('数据解析失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -138,7 +138,7 @@ class Wxapp extends Controller
                 $this->app->cache->set($code, $result, 7200);
                 return [$result['openid'], $result['unionid'] ?? '', $result['session_key']];
             } else {
-                $this->error($result['errmsg'] ?? '授权换取失败，请稍候再试！');
+                $this->error($result['errmsg'] ?? '授权换取失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -157,7 +157,7 @@ class Wxapp extends Controller
             $data = $this->_vali([
                 'size.default' => 430,
                 'type.default' => 'base64',
-                'path.require' => '跳转路径不能为空!',
+                'path.require' => '跳转不能为空',
             ]);
             $result = Qrcode::instance($this->params)->createMiniPath($data['path'], $data['size']);
             if ($data['type'] === 'base64') {

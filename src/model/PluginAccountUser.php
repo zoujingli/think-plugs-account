@@ -56,5 +56,4 @@ class PluginAccountUser extends Abs
     {
         return empty($value) ? [] : (is_string($value) ? json_decode($value, true) : $value);
     }
-
 }

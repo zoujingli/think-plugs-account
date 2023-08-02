@@ -123,7 +123,6 @@ class AccountAccess implements AccountInterface
      */
     public function set(array $data = [], bool $rejwt = false): array
     {
-        $data['type'] = $this->type;
         // 如果传入授权验证字段
         if (isset($data[$this->field])) {
             if ($this->bind->isExists()) {
@@ -137,12 +136,9 @@ class AccountAccess implements AccountInterface
         } elseif ($this->bind->isEmpty()) {
             throw new Exception("必要字段 {$this->field} 不能为空！");
         }
-        $this->bind = $this->save($data);
-        if ($this->bind->isEmpty()) {
-            throw new Exception("更新用户资料失败！");
-        } else {
-            return $this->token(intval($this->bind->getAttr('id')))->get($rejwt);
-        }
+        $this->bind = $this->save(array_merge($data, ['type' => $this->type]));
+        if ($this->bind->isEmpty()) throw new Exception("更新用户资料失败！");
+        return $this->token(intval($this->bind->getAttr('id')))->get($rejwt);
     }
 
     /**
@@ -181,10 +177,10 @@ class AccountAccess implements AccountInterface
             $user->setAttr('extra', array_merge($user->getAttr('extra'), $data['extra']));
             unset($data['extra']);
         }
-        if ($user->isEmpty()) {
-            do $data['code'] = $this->generateUserCode();
-            while (PluginAccountUser::mk()->where(['code' => $data['code']])->findOrEmpty()->isExists());
-        }
+        // 生成新的用户编号
+        if ($user->isEmpty()) do $data['code'] = $this->generateUserCode();
+        while (PluginAccountUser::mk()->master()->where(['code' => $data['code']])->findOrEmpty()->isExists());
+        // 保存更新用户数据
         if ($user->save($data + $map) && $user->isExists()) {
             $this->bind->save(['unid' => $user['id']]);
             $this->app->event->trigger('PluginAccountBind', [
@@ -274,7 +270,7 @@ class AccountAccess implements AccountInterface
     {
         if ($this->bind->isExists() && ($user = $this->bind->user()->findOrEmpty())->isExists()) {
             do $data = ['code' => $this->generateUserCode()];
-            while (PluginAccountUser::mk()->where($data)->findOrEmpty()->isExists());
+            while (PluginAccountUser::mk()->master()->where($data)->findOrEmpty()->isExists());
             $user->save($data);
         }
         return $this->get();
@@ -288,11 +284,11 @@ class AccountAccess implements AccountInterface
     public function check(): array
     {
         if ($this->bind->isEmpty()) {
-            throw new Exception('登录令牌无效，请重新登录！', 401);
+            throw new Exception('登录令牌无效', 401);
         }
         if ($this->auth->getAttr('token') !== static::tester) {
             if ($this->expire > 0 && $this->auth->getAttr('time') < time()) {
-                throw new Exception('登录认证超时，请重新登录！', 502);
+                throw new Exception('登录认证超时', 403);
             }
         }
         return static::expire()->get();
@@ -316,7 +312,7 @@ class AccountAccess implements AccountInterface
         // 生成新令牌数据
         if ($this->auth->isEmpty()) {
             do $data = ['type' => $this->type, 'token' => md5(uniqid(strval(rand(0, 999))))];
-            while (PluginAccountAuth::mk()->where($data)->findOrEmpty()->isExists());
+            while (PluginAccountAuth::mk()->master()->where($data)->findOrEmpty()->isExists());
             $this->auth->save($data + ['usid' => $unid]);
         }
         return $this->expire();
@@ -344,7 +340,7 @@ class AccountAccess implements AccountInterface
     protected function save(array $data): PluginAccountBind
     {
         if (empty($data)) {
-            throw new Exception('用户数据不能为空！');
+            throw new Exception('资料不能为空！');
         }
         if (!empty($data['extra'])) {
             $extra = $this->bind->getAttr('extra');
@@ -354,7 +350,7 @@ class AccountAccess implements AccountInterface
         if ($this->bind->save($data) && $this->bind->isExists()) {
             return $this->bind->refresh();
         } else {
-            throw new Exception('用户数据保存失败！');
+            throw new Exception('资料保存失败！');
         }
     }
 

@@ -24,6 +24,11 @@ use think\admin\Exception;
 use think\admin\extend\CodeExtend;
 use think\admin\extend\HttpExtend;
 
+/**
+ * 阿里云短信服务
+ * @class Alisms
+ * @package plugin\account\service\message
+ */
 class Alisms implements MessageInterface
 {
     use MessageUsageTrait;

@@ -71,14 +71,14 @@ abstract class Message
             // 检查是否已经发送
             if (is_array($cache) && isset($cache['time']) && $cache['time'] > time() - $wait) {
                 $dtime = ($cache['time'] + $wait < time()) ? 0 : ($wait - time() + $cache['time']);
-                return [1, '验证码已发送！', ['time' => $dtime]];
+                return [1, '验证码已发送', ['time' => $dtime]];
             }
             // 生成新的验证码
             [$code, $time] = [rand(100000, 999999), time()];
             Library::$sapp->cache->set($ckey, ['code' => $code, 'time' => $time], 600);
             // 尝试发送短信内容
             self::mk()->verify($scene, $phone, ['code' => $code]);
-            return [1, '验证码发送成功！', ['time' => ($time + $wait < time()) ? 0 : ($wait - time() + $time)]];
+            return [1, '验证码发送成功', ['time' => ($time + $wait < time()) ? 0 : ($wait - time() + $time)]];
         } catch (\Exception $ex) {
             isset($ckey) && Library::$sapp->cache->delete($ckey);
             return [0, $ex->getMessage(), []];
@@ -126,7 +126,7 @@ abstract class Message
         if (isset(array_change_key_case(static::$scenes)[strtolower($scene)])) {
             return md5(strtolower("sms-{$scene}-{$phone}"));
         } else {
-            throw new Exception("未定义业务场景 {$scene} 模板编号！");
+            throw new Exception("未定义的业务");
         }
     }
 

@@ -62,13 +62,13 @@ abstract class Auth extends Controller
         try {
             // 获取请求令牌内容
             $token = $this->request->header('api-token', '');
-            if (empty($token)) $this->error("请求TOKEN不能为空！");
+            if (empty($token)) $this->error('无效授权令牌', [], 401);
             // 读取用户账号数据
             $this->account = Account::mk('', $token);
-            $bind = $this->account->check();
-            $this->usid = intval($bind['id'] ?? 0);
-            $this->unid = intval($bind['unid'] ?? 0);
-            $this->type = strval($bind['type'] ?? '');
+            $login = $this->account->check();
+            $this->usid = intval($login['id'] ?? 0);
+            $this->unid = intval($login['unid'] ?? 0);
+            $this->type = strval($login['type'] ?? '');
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -83,15 +83,15 @@ abstract class Auth extends Controller
      */
     protected function checkUserStatus(bool $isBind = true)
     {
-        $bind = $this->account->get();
-        if (empty($bind['status'])) {
-            $this->error('终端用户已被冻结！');
+        $login = $this->account->get();
+        if (empty($login['status'])) {
+            $this->error('终端已冻结', $login);
         } elseif ($isBind) {
-            if (empty($bind['user'])) {
-                $this->error('请完善账号资料！');
+            if (empty($login['user'])) {
+                $this->error('请完善资料', $login, 402);
             }
-            if (empty($bind['user']['status'])) {
-                $this->error('账号已被冻结！');
+            if (empty($login['user']['status'])) {
+                $this->error('账号已冻结', $login);
             }
         }
     }

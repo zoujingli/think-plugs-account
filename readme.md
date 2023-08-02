@@ -5,8 +5,8 @@
 [![Total Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/downloads)](https://packagist.org/packages/zoujingli/think-plugs-account)
 [![Monthly Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/d/monthly)](https://packagist.org/packages/zoujingli/think-plugs-account)
 [![Daily Downloads](https://poser.pugx.org/zoujingli/think-plugs-account/d/daily)](https://packagist.org/packages/zoujingli/think-plugs-account)
-[![PHP Version](https://doc.thinkadmin.top/static/icon/php-7.1.svg)](https://thinkadmin.top)
-[![License](https://doc.thinkadmin.top/static/icon/license-vip.svg)](https://thinkadmin.top/vip-introduce)
+[![PHP Version](https://thinkadmin.top/static/icon/php-7.1.svg)](https://thinkadmin.top)
+[![License](https://thinkadmin.top/static/icon/license-vip.svg)](https://thinkadmin.top/vip-introduce)
 
 **注意：** 该插件测试版有数据库结构变化，未生成升级补丁，每次更新需要全新安装！
 
@@ -39,6 +39,14 @@
 **接口文档：** https://documenter.getpostman.com/view/4518676/2s93eeRpDr
 
 **特别注意：** 调用接口时后台接口未启动 `Session` 中间键，建议使用 `Cache & usid` 或 `Cache & unid` 作为`key`值来缓存数据。
+
+### 接口状态
+
+* `code`:`0` 操作失败，稍候重试
+* `code`:`1` 操作成功，正常操作
+* `code`:`401` 无效令牌，需要重新登录
+* `code`:`402` 资料不全，需要补全资料
+* `code`:`403` 认证超时，需要重新登录
 
 ### 安装插件
 

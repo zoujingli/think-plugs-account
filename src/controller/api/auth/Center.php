@@ -34,7 +34,7 @@ class Center extends Auth
      */
     public function get()
     {
-        $this->success('获取用户账号！', $this->account->get());
+        $this->success('获取资料成功', $this->account->get());
     }
 
     /**
@@ -52,23 +52,8 @@ class Center extends Auth
             'region_area.default' => '',
         ]);
         foreach ($data as $k => $v) if ($v === '') unset($data[$k]);
-        if (empty($data)) $this->success('无需修改！', $this->account->get());
-        $this->success('修改成功！', $this->account->bind(['id' => $this->unid], $data));
-    }
-
-    /**
-     * 发送短信验证码
-     * @return void
-     */
-    public function send()
-    {
-        $this->checkUserStatus(false);
-        $data = $this->_vali([
-            'phone.mobile'  => '手机号格式错误！',
-            'phone.require' => '手机号不能为空！',
-        ]);
-        [$state, $info, $time] = Message::sendVerifyCode($data['phone']);
-        $state ? $this->success($info, ['time' => $time]) : $this->error($info);
+        if (empty($data)) $this->success('无需修改资料', $this->account->get());
+        $this->success('修改资料成功', $this->account->bind(['id' => $this->unid], $data));
     }
 
     /**
@@ -93,9 +78,9 @@ class Center extends Auth
                 $bind['nickname'] = $user['nickname'];
             }
             $this->account->bind(['phone' => $bind['phone']], $bind);
-            $this->success('绑定主账号成功！', $this->account->get());
+            $this->success('绑定主账号成功', $this->account->get());
         } else {
-            $this->error('短信验证失败！');
+            $this->error('短信验证失败');
         }
     }
 
@@ -106,6 +91,6 @@ class Center extends Auth
     public function unbind()
     {
         $this->account->unBind();
-        $this->success('解除关联成功！', $this->account->get());
+        $this->success('解除关联成功', $this->account->get());
     }
 }

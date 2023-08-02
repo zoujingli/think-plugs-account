@@ -30,7 +30,7 @@ use think\Response;
  * @example 域名请修改为自己的地址，放到网页代码合适位置
  *
  * <meta name="referrer" content="always">
- * <script referrerpolicy="unsafe-url" src="https://your.domain.com/data/api.wechat/oauth?mode=1"></script>
+ * <script referrerpolicy="unsafe-url" src="https://your.domain.com/plugin-account/api.wechat/oauth?mode=1"></script>
  *
  * 授权模式支持两种模块，参数 mode=0 时为静默授权，mode=1 时为完整授权
  * 注意：回跳地址默认从 Header 中的 http_referer 获取，也可以传 source 参数
@@ -65,7 +65,7 @@ class Wechat extends Controller
             $this->wechat = WechatService::instance();
             $this->location = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
         } else {
-            $this->error(sprintf('接口通道 [%s] 未开通！', static::type));
+            $this->error('接口未开通');
         }
     }
 
@@ -77,7 +77,7 @@ class Wechat extends Controller
      */
     public function jssdk()
     {
-        $this->success('获取签名参数', $this->wechat->getWebJssdkSign($this->location));
+        $this->success('获取网页签名', $this->wechat->getWebJssdkSign($this->location));
     }
 
     /**
@@ -105,6 +105,7 @@ class Wechat extends Controller
             $script[] = "window.WeChatOpenid='{$result['openid']}'";
             $script[] = 'window.WeChatFansInfo=' . json_encode($result['fansinfo'], 64 | 128 | 256);
             $script[] = 'window.WeChatUserInfo=' . json_encode($result['userinfo'], 64 | 128 | 256);
+            $script[] = "localStorage.setItem('auth.token','{$result['userinfo']['token']}')";
         }
         $script[] = '';
         return Response::create(join(";\n", $script))->contentType('application/javascript');

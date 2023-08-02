@@ -26,7 +26,7 @@ use think\admin\extend\JwtExtend;
 
 /**
  * 用户账号调度器
- * Class Account
+ * @class Account
  * @package plugin\account\service
  */
 abstract class Account
@@ -63,22 +63,22 @@ abstract class Account
     {
         if ($token === AccountAccess::tester) {
             if (empty($type)) {
-                $auth = PluginAccountAuth::mk()->where(['token' => $token])->findOrEmpty();
-                if ($auth->isEmpty()) throw new Exception('测试账号不存在！');
-                $type = $auth->getAttr('type');
+                $type = PluginAccountAuth::mk()->where(['token' => $token])->value('type');
+                if (empty($type)) throw new Exception('测试账号不存在');
             }
         } elseif ($isjwt && strlen($token) > 32) {
-            $result = JwtExtend::verify($token);
-            if (isset($result['token'])) $token = $result['token'];
-            if (isset($result['type']) && $result['type'] !== $type) {
-                throw new Exception("请求 TOKEN 与接口通道不匹配！");
+            $data = JwtExtend::verify($token);
+            $type = $type ?: ($data['type'] ?? '');
+            $token = $data['token'] ?? $token;
+            if (isset($data['type']) && $data['type'] !== $type) {
+                throw new Exception("授权不匹配");
             }
         }
         if (self::field($type)) {
             $vars = ['type' => $type, 'field' => self::$types[$type]['field']];
             return app(AccountAccess::class, $vars)->init($token, $isjwt);
         } else {
-            throw new Exception("用户通道 [{$type}] 未定义或参数错误");
+            throw new Exception("接口访问异常");
         }
     }
 
@@ -187,7 +187,7 @@ abstract class Account
             $map = ['token' => $token];
             empty($type) or ($map['type'] = $type);
             $auth = PluginAccountAuth::mk()->where($map)->findOrEmpty();
-            if ($auth->isEmpty()) throw new Exception('测试账号不存在！');
+            if ($auth->isEmpty()) throw new Exception('测试账号不存在');
             return static::mk($type = $auth->getAttr('type'), $auth->getAttr('token'));
         } else {
             $data = JwtExtend::verify($token);
