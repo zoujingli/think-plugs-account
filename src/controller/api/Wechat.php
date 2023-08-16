@@ -42,13 +42,13 @@ class Wechat extends Controller
      * 通道认证类型
      * @var string
      */
-    const type = Account::WECHAT;
+    private const type = Account::WECHAT;
 
     /**
      * 接口原地址
      * @var string
      */
-    private $location;
+    private $source;
 
     /**
      * 微信调度器
@@ -63,7 +63,7 @@ class Wechat extends Controller
     {
         if (Account::field(static::type)) {
             $this->wechat = WechatService::instance();
-            $this->location = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
+            $this->source = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
         } else {
             $this->error('接口未开通');
         }
@@ -77,7 +77,7 @@ class Wechat extends Controller
      */
     public function jssdk()
     {
-        $this->success('获取网页签名', $this->wechat->getWebJssdkSign($this->location));
+        $this->success('获取网页签名', $this->wechat->getWebJssdkSign($this->source));
     }
 
     /**
@@ -90,7 +90,7 @@ class Wechat extends Controller
     public function oauth(): Response
     {
         $script = [];
-        $result = $this->wechat->getWebOauthInfo($this->location, (int)input('mode', 1), false);
+        $result = $this->wechat->getWebOauthInfo($this->source, (int)input('mode', 1), false);
         if (empty($result['openid'])) {
             $script[] = 'alert("WeChat Oauth failed.")';
         } else {

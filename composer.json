@@ -3,13 +3,13 @@
   "name": "zoujingli/think-plugs-account",
   "homepage": "https://thinkadmin.top",
   "description": "Account Plugin for ThinkAdmin",
-  "version": "dev-master",
   "authors": [
     {
       "name": "Anyon",
       "email": "zoujingli@qq.com"
     }
   ],
+  "version": "dev-master",
   "require": {
     "php": ">=7.1",
     "ext-gd": "*",

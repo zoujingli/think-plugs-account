@@ -37,7 +37,7 @@
                 {field: 'nickname', title: '用户昵称', minWidth: 100, align: 'center', templet: '<div>{{d.nickname||"-"}}</div>'},
                 {
                     field: 'id', title: '关联账号', minWidth: 100, align: 'center', templet: function (d) {
-                        return d.user ? d.user.code : '临时账号';
+                        return d.user ? d.user.code : '-';
                     }
                 },
                 {field: 'status', title: '账号状态', align: 'center', minWidth: 110, templet: '#StatusSwitchTpl'},

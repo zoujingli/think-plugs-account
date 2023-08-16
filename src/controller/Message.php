@@ -61,7 +61,7 @@ class Message extends Controller
     {
         PluginAccountMsms::mQuery()->layTable(function () {
             $this->title = '短信记录管理';
-        }, function (QueryHelper $query) {
+        }, static function (QueryHelper $query) {
             $query->equal('status')->like('smsid,scene,phone')->dateBetween('create_time');
         });
     }

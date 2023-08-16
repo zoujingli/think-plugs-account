@@ -102,11 +102,11 @@ interface AccountInterface
 
     /**
      * 生成授权令牌
-     * @param integer $unid
+     * @param integer $usid
      * @return \plugin\account\service\contract\AccountInterface
      * @throws \think\db\exception\DbException
      */
-    public function token(int $unid): AccountInterface;
+    public function token(int $usid): AccountInterface;
 
     /**
      * 延期令牌时间

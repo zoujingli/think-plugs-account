@@ -37,7 +37,7 @@ class Wxapp extends Controller
      * 接口通道类型
      * @var string
      */
-    protected const type = Account::WXAPP;
+    private const type = Account::WXAPP;
 
     /**
      * 小程序配置参数
@@ -52,7 +52,7 @@ class Wxapp extends Controller
     protected function initialize()
     {
         if (Account::field(static::type)) {
-            $wxapp = sysdata('wxapp');
+            $wxapp = sysdata('plugin.wechat.wxapp');
             $this->params = [
                 'appid'      => $wxapp['appid'] ?? '',
                 'appsecret'  => $wxapp['appkey'] ?? '',
@@ -101,12 +101,14 @@ class Wxapp extends Controller
             $result = Crypt::instance($this->params)->decode($input['iv'], $input['session_key'], $input['encrypted']);
             if (is_array($result) && isset($result['avatarUrl']) && isset($result['nickName'])) {
                 $data = [
+                    'extra'    => $result,
                     'appid'    => $this->params['appid'],
                     'openid'   => $openid,
                     'unionid'  => $unionid,
                     'headimg'  => $result['avatarUrl'],
                     'nickname' => $result['nickName'],
                 ];
+                if ($data['nickname'] === '微信用户') unset($data['headimg'], $data['nickname']);
                 $this->success('数据解密成功', Account::mk(static::type)->set($data, true));
             } elseif (is_array($result)) {
                 $this->success('数据解密成功', $result);

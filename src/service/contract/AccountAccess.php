@@ -127,7 +127,7 @@ class AccountAccess implements AccountInterface
         if (isset($data[$this->field])) {
             if ($this->bind->isExists()) {
                 if ($data[$this->field] !== $this->bind->getAttr($this->field)) {
-                    throw new Exception('不能直接更换绑定');
+                    throw new Exception('不能强行更换绑定！');
                 }
             } else {
                 $map = [$this->field => $data[$this->field]];
@@ -137,7 +137,7 @@ class AccountAccess implements AccountInterface
             throw new Exception("必要字段 {$this->field} 不能为空！");
         }
         $this->bind = $this->save(array_merge($data, ['type' => $this->type]));
-        if ($this->bind->isEmpty()) throw new Exception("更新用户资料失败！");
+        if ($this->bind->isEmpty()) throw new Exception("更新资料失败！");
         return $this->token(intval($this->bind->getAttr('id')))->get($rejwt);
     }
 
@@ -171,15 +171,15 @@ class AccountAccess implements AccountInterface
         if ($this->bind->isEmpty()) throw new Exception('终端用户不存在！');
         $user = PluginAccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
         if ($this->bind->getAttr('unid') > 0 && ($user->isEmpty() || $this->bind->getAttr('unid') !== $user['id'])) {
-            throw new Exception("已绑定其他用户！");
+            throw new Exception("已绑定用户！");
         }
         if (!empty($data['extra'])) {
             $user->setAttr('extra', array_merge($user->getAttr('extra'), $data['extra']));
             unset($data['extra']);
         }
         // 生成新的用户编号
-        if ($user->isEmpty()) do $data['code'] = $this->generateUserCode();
-        while (PluginAccountUser::mk()->master()->where(['code' => $data['code']])->findOrEmpty()->isExists());
+        if ($user->isEmpty()) do $check = ['code' => $data['code'] = $this->userCode()];
+        while (PluginAccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
         // 保存更新用户数据
         if ($user->save($data + $map) && $user->isExists()) {
             $this->bind->save(['unid' => $user['id']]);
@@ -268,10 +268,11 @@ class AccountAccess implements AccountInterface
      */
     public function recode(): array
     {
-        if ($this->bind->isExists() && ($user = $this->bind->user()->findOrEmpty())->isExists()) {
-            do $data = ['code' => $this->generateUserCode()];
-            while (PluginAccountUser::mk()->master()->where($data)->findOrEmpty()->isExists());
-            $user->save($data);
+        if ($this->bind->isEmpty()) return $this->get();
+        if (($user = $this->bind->user()->findOrEmpty())->isExists()) {
+            do $check = ['code' => $this->userCode()];
+            while (PluginAccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
+            $user->save($check);
         }
         return $this->get();
     }
@@ -284,11 +285,11 @@ class AccountAccess implements AccountInterface
     public function check(): array
     {
         if ($this->bind->isEmpty()) {
-            throw new Exception('登录令牌无效', 401);
+            throw new Exception('登录令牌无效！', 401);
         }
         if ($this->auth->getAttr('token') !== static::tester) {
             if ($this->expire > 0 && $this->auth->getAttr('time') < time()) {
-                throw new Exception('登录认证超时', 403);
+                throw new Exception('登录认证超时！', 403);
             }
         }
         return static::expire()->get();
@@ -296,31 +297,26 @@ class AccountAccess implements AccountInterface
 
     /**
      * 生成授权令牌
-     * @param integer $unid
-     * @return \plugin\account\service\contract\AccountInterface
+     * @param integer $usid
+     * @return AccountInterface
      */
-    public function token(int $unid): AccountInterface
+    public function token(int $usid): AccountInterface
     {
         // 清理无效令牌
         PluginAccountAuth::mk()->where('token', '<>', self::tester)->whereBetween('time', [1, time()])->delete();
-
-        // 刷新登录令牌
-        if ($this->auth->isEmpty()) {
-            $this->auth = PluginAccountAuth::mk()->where(['usid' => $unid])->findOrEmpty();
-        }
-
+        if ($this->auth->isEmpty()) $this->auth = PluginAccountAuth::mk()->where(['usid' => $usid])->findOrEmpty();
         // 生成新令牌数据
         if ($this->auth->isEmpty()) {
-            do $data = ['type' => $this->type, 'token' => md5(uniqid(strval(rand(0, 999))))];
-            while (PluginAccountAuth::mk()->master()->where($data)->findOrEmpty()->isExists());
-            $this->auth->save($data + ['usid' => $unid]);
+            do $check = ['type' => $this->type, 'token' => md5(uniqid(strval(rand(0, 999))))];
+            while (PluginAccountAuth::mk()->master()->where($check)->findOrEmpty()->isExists());
+            $this->auth->save($check + ['usid' => $usid]);
         }
         return $this->expire();
     }
 
     /**
      * 延期令牌时间
-     * @return \plugin\account\service\contract\AccountInterface
+     * @return AccountInterface
      */
     public function expire(): AccountInterface
     {
@@ -334,19 +330,13 @@ class AccountAccess implements AccountInterface
     /**
      * 更新用户资料
      * @param array $data
-     * @return \plugin\account\model\PluginAccountBind
+     * @return PluginAccountBind
      * @throws \think\admin\Exception
      */
-    protected function save(array $data): PluginAccountBind
+    private function save(array $data): PluginAccountBind
     {
-        if (empty($data)) {
-            throw new Exception('资料不能为空！');
-        }
-        if (!empty($data['extra'])) {
-            $extra = $this->bind->getAttr('extra');
-            $this->bind->setAttr('extra', array_merge($extra, $data['extra']));
-            unset($data['extra']);
-        }
+        if (empty($data)) throw new Exception('资料不能为空！');
+        $data['extra'] = array_merge($this->bind->getAttr('extra'), $data['extra'] ?? []);
         if ($this->bind->save($data) && $this->bind->isExists()) {
             return $this->bind->refresh();
         } else {
@@ -358,8 +348,8 @@ class AccountAccess implements AccountInterface
      * 生成用户随机编号
      * @return string
      */
-    private function generateUserCode(): string
+    private function userCode(): string
     {
-        return 'U' . CodeExtend::uniqidNumber(15);
+        return CodeExtend::uniqidNumber(16, 'U');
     }
 }

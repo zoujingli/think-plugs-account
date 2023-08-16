@@ -64,21 +64,21 @@ abstract class Account
         if ($token === AccountAccess::tester) {
             if (empty($type)) {
                 $type = PluginAccountAuth::mk()->where(['token' => $token])->value('type');
-                if (empty($type)) throw new Exception('测试账号不存在');
+                if (empty($type)) throw new Exception('账号不存在！');
             }
         } elseif ($isjwt && strlen($token) > 32) {
             $data = JwtExtend::verify($token);
             $type = $type ?: ($data['type'] ?? '');
             $token = $data['token'] ?? $token;
             if (isset($data['type']) && $data['type'] !== $type) {
-                throw new Exception("授权不匹配");
+                throw new Exception('授权不匹配！');
             }
         }
         if (self::field($type)) {
             $vars = ['type' => $type, 'field' => self::$types[$type]['field']];
             return app(AccountAccess::class, $vars)->init($token, $isjwt);
         } else {
-            throw new Exception("接口访问异常");
+            throw new Exception('接口访问异常！');
         }
     }
 
@@ -187,7 +187,7 @@ abstract class Account
             $map = ['token' => $token];
             empty($type) or ($map['type'] = $type);
             $auth = PluginAccountAuth::mk()->where($map)->findOrEmpty();
-            if ($auth->isEmpty()) throw new Exception('测试账号不存在');
+            if ($auth->isEmpty()) throw new Exception('账号不存在！');
             return static::mk($type = $auth->getAttr('type'), $auth->getAttr('token'));
         } else {
             $data = JwtExtend::verify($token);

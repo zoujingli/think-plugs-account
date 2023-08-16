@@ -24,7 +24,7 @@ use think\admin\Exception;
 use think\admin\Library;
 
 /**
- * 短信平台调度器
+ * 短信服务调度器
  * @class Message
  * @mixin MessageInterface
  * @package plugin\account\service
@@ -95,7 +95,7 @@ abstract class Message
      */
     public static function checkVerifyCode(string $vcode, string $phone, string $scene = 'REGISTER'): bool
     {
-        $cache = Library::$sapp->cache->get(self::genCacheKey($phone, $scene), []);
+        $cache = Library::$sapp->cache->get(static::genCacheKey($phone, $scene), []);
         return is_array($cache) && isset($cache['code']) && $cache['code'] == $vcode;
     }
 
@@ -108,7 +108,7 @@ abstract class Message
     public static function clearVerifyCode(string $phone, string $scene = 'REGISTER'): bool
     {
         try {
-            return Library::$sapp->cache->delete(self::genCacheKey($phone, $scene));
+            return Library::$sapp->cache->delete(static::genCacheKey($phone, $scene));
         } catch (\Exception $exception) {
             return false;
         }
