@@ -21,6 +21,10 @@ namespace plugin\account\service\contract;
 use plugin\account\model\PluginAccountMsms;
 use think\admin\Exception;
 
+/**
+ * 短信通用接口
+ * @class MessageUsageTrait
+ */
 trait MessageUsageTrait
 {
     /**

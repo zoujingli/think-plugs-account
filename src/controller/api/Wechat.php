@@ -86,26 +86,32 @@ class Wechat extends Controller
      * @throws \WeChat\Exceptions\InvalidResponseException
      * @throws \WeChat\Exceptions\LocalCacheException
      * @throws \think\admin\Exception
+     * @remark 基于 localStorage 标识的登录机制
      */
     public function oauth(): Response
     {
         $script = [];
-        $result = $this->wechat->getWebOauthInfo($this->source, (int)input('mode', 1), false);
+        $result = $this->wechat->getWebOauthInfo($this->source, intval(input('mode', 0)), false);
         if (empty($result['openid'])) {
             $script[] = 'alert("WeChat Oauth failed.")';
         } else {
             $fans = $result['fansinfo'] ?? [];
-            // 筛选保存数据
-            $data = ['appid' => WechatService::getAppid(), 'openid' => $result['openid'], 'extra' => $fans];
-            if (isset($fans['unionid'])) $data['unionid'] = $fans['unionid'];
-            if (isset($fans['nickname'])) $data['nickname'] = $fans['nickname'];
-            if (isset($fans['headimgurl'])) $data['headimg'] = $fans['headimgurl'];
-            $result['userinfo'] = Account::mk(static::type)->set($data, true);
-            // 返回数据给前端
-            $script[] = "window.WeChatOpenid='{$result['openid']}'";
-            $script[] = 'window.WeChatFansInfo=' . json_encode($result['fansinfo'], 64 | 128 | 256);
-            $script[] = 'window.WeChatUserInfo=' . json_encode($result['userinfo'], 64 | 128 | 256);
-            $script[] = "localStorage.setItem('auth.token','{$result['userinfo']['token']}')";
+            if (empty($fans['is_snapshotuser'])) {
+                // 筛选保存数据
+                $data = ['appid' => WechatService::getAppid(), 'openid' => $result['openid'], 'extra' => $fans];
+                if (isset($fans['unionid'])) $data['unionid'] = $fans['unionid'];
+                if (isset($fans['nickname'])) $data['nickname'] = $fans['nickname'];
+                if (isset($fans['headimgurl'])) $data['headimg'] = $fans['headimgurl'];
+                $result['userinfo'] = Account::mk(static::type)->set($data, true);
+                // 返回数据给前端
+                $script[] = "window.WeChatOpenid='{$result['openid']}'";
+                $script[] = 'window.WeChatFansInfo=' . json_encode($result['fansinfo'], 64 | 128 | 256);
+                $script[] = 'window.WeChatUserInfo=' . json_encode($result['userinfo'], 64 | 128 | 256);
+                $script[] = "sessionStorage.setItem('wechat.token','{$result['userinfo']['token']}')";
+            } else {
+                $script[] = 'alert("不支持虚拟用户登录！\n请 10 秒后刷新页面选择授权！")';
+                $script[] = 'location.reload()';
+            }
         }
         $script[] = '';
         return Response::create(join(";\n", $script))->contentType('application/javascript');
