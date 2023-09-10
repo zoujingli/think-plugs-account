@@ -20,6 +20,7 @@ namespace plugin\account\controller\api\auth;
 
 use plugin\account\controller\api\Auth;
 use plugin\account\service\Message;
+use think\admin\service\RuntimeService;
 
 /**
  * 用户账号管理
@@ -68,7 +69,7 @@ class Center extends Auth
             'phone.require'  => '手机号不能为空！',
             'verify.require' => '验证码不能为空！',
         ]);
-        $isLogin = $data['verify'] === '123456';
+        $isLogin = $data['verify'] === '123456' && RuntimeService::check(RuntimeService::MODE_DEMO);
         if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
             Message::clearVerifyCode($data['phone']);
             $user = $this->account->get();

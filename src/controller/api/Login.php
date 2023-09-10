@@ -22,6 +22,7 @@ use plugin\account\service\Account;
 use plugin\account\service\Message;
 use think\admin\Controller;
 use think\admin\extend\ImageVerify;
+use think\admin\service\RuntimeService;
 
 /**
  * 手机号登录入口
@@ -46,7 +47,7 @@ class Login extends Controller
         if (Account::field($data['type']) !== 'phone') {
             $this->error('不支持手机登录');
         }
-        $isLogin = $data['verify'] === '123456';
+        $isLogin = $data['verify'] === '123456' && RuntimeService::check(RuntimeService::MODE_DEMO);
         if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
             Message::clearVerifyCode($data['phone']);
             $account = Account::mk($data['type']);
