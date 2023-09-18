@@ -39,23 +39,23 @@ class Login extends Controller
     public function in()
     {
         $data = $this->_vali([
-            'type.require'   => '类型不能为空！',
-            'phone.mobile'   => '手机号格式错误！',
-            'phone.require'  => '手机号不能为空！',
-            'verify.require' => '验证码不能为空！'
+            'type.require'   => '类型为空！',
+            'phone.mobile'   => '手机号错误！',
+            'phone.require'  => '手机号为空！',
+            'verify.require' => '验证码为空！'
         ]);
         if (Account::field($data['type']) !== 'phone') {
-            $this->error('不支持手机登录');
+            $this->error('不支持登录！');
         }
-        $isLogin = $data['verify'] === '123456' && RuntimeService::check(RuntimeService::MODE_DEMO);
+        $isLogin = $data['verify'] === '123456' && RuntimeService::check();
         if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
             Message::clearVerifyCode($data['phone']);
             $account = Account::mk($data['type']);
             $account->set($inset = ['phone' => $data['phone']]);
             $account->isBind() || $account->bind($inset, $inset);
-            $this->success('绑定主账号成功', $account->get(true));
+            $this->success('关联账号成功！', $account->get(true));
         } else {
-            $this->error('短信验证失败');
+            $this->error('短信验证失败！');
         }
     }
 
@@ -66,10 +66,10 @@ class Login extends Controller
     public function send()
     {
         $data = $this->_vali([
-            'phone.mobile'   => '手机号格式错误！',
-            'phone.require'  => '手机号不能为空！',
-            'uniqid.require' => '拼图编号不能为空！',
-            'verify.require' => '拼图位置不能为空！',
+            'phone.mobile'   => '手机号错误！',
+            'phone.require'  => '手机号为空！',
+            'uniqid.require' => '拼图编号为空！',
+            'verify.require' => '拼图位置为空！',
         ]);
         // 检查拼图验证码
         $state = ImageVerify::verify($data['uniqid'], $data['verify'], true);
@@ -78,7 +78,7 @@ class Login extends Controller
             [$state, $info, $result] = Message::sendVerifyCode($data['phone']);
             $state ? $this->success($info, $result) : $this->error($info);
         } else {
-            $this->error('拼图验证失败');
+            $this->error('拼图验证失败！');
         }
     }
 
@@ -93,7 +93,7 @@ class Login extends Controller
             syspath('public/static/theme/img/login/bg2.jpg'),
         ];
         $image = ImageVerify::render($images[array_rand($images)]);
-        $this->success('生成拼图成功', [
+        $this->success('生成拼图成功！', [
             'bgimg'  => $image['bgimg'],
             'water'  => $image['water'],
             'uniqid' => $image['code'],
@@ -107,11 +107,11 @@ class Login extends Controller
     public function verify()
     {
         $data = $this->_vali([
-            'uniqid.require' => '拼图验证不能为空！',
-            'verify.require' => '拼图数值不能为空！'
+            'uniqid.require' => '拼图验证为空！',
+            'verify.require' => '拼图数值为空！'
         ]);
         // state: [ -1:需要刷新, 0:验证失败, 1:验证成功 ]
-        $this->success('获取验证结果', [
+        $this->success('获取验证结果！', [
             'state' => ImageVerify::verify($data['uniqid'], $data['verify'])
         ]);
     }

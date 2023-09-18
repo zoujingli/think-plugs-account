@@ -18,6 +18,7 @@ declare (strict_types=1);
 
 namespace plugin\account\model;
 
+use plugin\account\service\Account;
 use think\model\relation\HasMany;
 use think\model\relation\HasOne;
 
@@ -64,5 +65,16 @@ class PluginAccountBind extends Abs
     public function getExtraAttr($value): array
     {
         return empty($value) ? [] : (is_string($value) ? json_decode($value, true) : $value);
+    }
+
+    /**
+     * 增加通道名称显示
+     * @return array
+     */
+    public function toArray(): array
+    {
+        $data = parent::toArray();
+        $data['type_name'] = Account::get($data['type'])['name'] ?? $data['type'];
+        return $data;
     }
 }

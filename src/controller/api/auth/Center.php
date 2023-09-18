@@ -35,7 +35,7 @@ class Center extends Auth
      */
     public function get()
     {
-        $this->success('获取资料成功', $this->account->get());
+        $this->success('获取资料成功！', $this->account->get());
     }
 
     /**
@@ -53,8 +53,8 @@ class Center extends Auth
             'region_area.default' => '',
         ]);
         foreach ($data as $k => $v) if ($v === '') unset($data[$k]);
-        if (empty($data)) $this->success('无需修改资料', $this->account->get());
-        $this->success('修改资料成功', $this->account->bind(['id' => $this->unid], $data));
+        if (empty($data)) $this->success('无需修改资料！', $this->account->get());
+        $this->success('修改资料成功！', $this->account->bind(['id' => $this->unid], $data));
     }
 
     /**
@@ -65,11 +65,11 @@ class Center extends Auth
     public function bind()
     {
         $data = $this->_vali([
-            'phone.mobile'   => '手机号格式错误！',
-            'phone.require'  => '手机号不能为空！',
-            'verify.require' => '验证码不能为空！',
+            'phone.mobile'   => '手机号错误！',
+            'phone.require'  => '手机号为空！',
+            'verify.require' => '验证码为空！',
         ]);
-        $isLogin = $data['verify'] === '123456' && RuntimeService::check(RuntimeService::MODE_DEMO);
+        $isLogin = $data['verify'] === '123456' && RuntimeService::check();
         if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
             Message::clearVerifyCode($data['phone']);
             $user = $this->account->get();
@@ -80,9 +80,9 @@ class Center extends Auth
                 $bind['nickname'] = $user['nickname'];
             }
             $this->account->bind(['phone' => $bind['phone']], $bind);
-            $this->success('绑定主账号成功', $this->account->get());
+            $this->success('账号关联成功!', $this->account->get());
         } else {
-            $this->error('短信验证失败');
+            $this->error('短信验证失败！');
         }
     }
 
@@ -93,6 +93,6 @@ class Center extends Auth
     public function unbind()
     {
         $this->account->unBind();
-        $this->success('解除关联成功', $this->account->get());
+        $this->success('解除关联成功！', $this->account->get());
     }
 }

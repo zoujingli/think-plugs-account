@@ -127,17 +127,17 @@ class AccountAccess implements AccountInterface
         if (isset($data[$this->field])) {
             if ($this->bind->isExists()) {
                 if ($data[$this->field] !== $this->bind->getAttr($this->field)) {
-                    throw new Exception('不能强行更换绑定！');
+                    throw new Exception('禁止强行关联！');
                 }
             } else {
                 $map = [$this->field => $data[$this->field]];
                 $this->bind = PluginAccountBind::mk()->where($map)->findOrEmpty();
             }
         } elseif ($this->bind->isEmpty()) {
-            throw new Exception("必要字段 {$this->field} 不能为空！");
+            throw new Exception("字段 {$this->field} 为空！");
         }
         $this->bind = $this->save(array_merge($data, ['type' => $this->type]));
-        if ($this->bind->isEmpty()) throw new Exception("更新资料失败！");
+        if ($this->bind->isEmpty()) throw new Exception('更新资料失败！');
         return $this->token(intval($this->bind->getAttr('id')))->get($rejwt);
     }
 
@@ -168,7 +168,7 @@ class AccountAccess implements AccountInterface
      */
     public function bind(array $map, array $data = []): array
     {
-        if ($this->bind->isEmpty()) throw new Exception('终端用户不存在！');
+        if ($this->bind->isEmpty()) throw new Exception('终端账号异常！');
         $user = PluginAccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
         if ($this->bind->getAttr('unid') > 0 && ($user->isEmpty() || $this->bind->getAttr('unid') !== $user['id'])) {
             throw new Exception("已绑定用户！");
@@ -200,7 +200,7 @@ class AccountAccess implements AccountInterface
     public function unBind(): array
     {
         if ($this->bind->isEmpty()) {
-            throw new Exception('终端账号不存在！');
+            throw new Exception('终端账号异常！');
         }
         if (($unid = $this->bind->getAttr('unid')) > 0) {
             $this->bind->save(['unid' => 0]);

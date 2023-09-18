@@ -78,7 +78,7 @@ abstract class Account
             $vars = ['type' => $type, 'field' => self::$types[$type]['field']];
             return app(AccountAccess::class, $vars)->init($token, $isjwt);
         } else {
-            throw new Exception('接口访问异常！');
+            throw new Exception('登录已超时！', 401);
         }
     }
 
@@ -125,6 +125,16 @@ abstract class Account
         } else {
             return false;
         }
+    }
+
+    /**
+     * 获取通道参数
+     * @param string $type
+     * @return array
+     */
+    public static function get(string $type): array
+    {
+        return self::$types[$type] ?? [];
     }
 
     /**

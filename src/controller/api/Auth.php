@@ -62,7 +62,7 @@ abstract class Auth extends Controller
         try {
             // 获取请求令牌内容
             $token = $this->request->header('api-token', '');
-            if (empty($token)) $this->error('无效授权令牌', [], 401);
+            if (empty($token)) $this->error('需要登录授权！', [], 401);
             // 读取用户账号数据
             $this->account = Account::mk('', $token);
             $login = $this->account->check();
@@ -85,13 +85,13 @@ abstract class Auth extends Controller
     {
         $login = $this->account->get();
         if (empty($login['status'])) {
-            $this->error('终端已冻结', $login);
+            $this->error('终端已冻结！', $login);
         } elseif ($isBind) {
             if (empty($login['user'])) {
-                $this->error('请完善资料', $login, 402);
+                $this->error('请完善资料！', $login, 402);
             }
             if (empty($login['user']['status'])) {
-                $this->error('账号已冻结', $login);
+                $this->error('账号已冻结！', $login);
             }
         }
     }

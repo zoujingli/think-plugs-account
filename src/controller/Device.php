@@ -51,19 +51,6 @@ class Device extends Controller
     }
 
     /**
-     * 数据列表处理
-     * @param array $data
-     * @return void
-     */
-    protected function _page_filter(array &$data)
-    {
-        $types = Account::types();
-        foreach ($data as &$vo) {
-            $vo['type_name'] = $types[$vo['type']]['name'] ?? $vo['type'];
-        }
-    }
-
-    /**
      * 配置终端类型
      * @auth true
      * @return void
