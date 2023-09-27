@@ -65,7 +65,7 @@ class Wechat extends Controller
             $this->wechat = WechatService::instance();
             $this->source = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
         } else {
-            $this->error('接口未开通');
+            $this->error('接口未开通！');
         }
     }
 
@@ -77,7 +77,7 @@ class Wechat extends Controller
      */
     public function jssdk()
     {
-        $this->success('获取网页签名', $this->wechat->getWebJssdkSign($this->source));
+        $this->success('获取网页签名！', $this->wechat->getWebJssdkSign($this->source));
     }
 
     /**
@@ -86,7 +86,7 @@ class Wechat extends Controller
      * @throws \WeChat\Exceptions\InvalidResponseException
      * @throws \WeChat\Exceptions\LocalCacheException
      * @throws \think\admin\Exception
-     * @remark 基于 localStorage 标识的登录机制
+     * @remark 基于 sessionStorage 标识的登录机制
      */
     public function oauth(): Response
     {
@@ -95,13 +95,13 @@ class Wechat extends Controller
         if (empty($result['openid'])) {
             $script[] = 'alert("WeChat Oauth failed.")';
         } else {
-            $fans = $result['fansinfo'] ?? [];
-            if (empty($fans['is_snapshotuser'])) {
+            $fansinfo = $result['fansinfo'] ?? [];
+            if (empty($fansinfo['is_snapshotuser'])) {
                 // 筛选保存数据
-                $data = ['appid' => WechatService::getAppid(), 'openid' => $result['openid'], 'extra' => $fans];
-                if (isset($fans['unionid'])) $data['unionid'] = $fans['unionid'];
-                if (isset($fans['nickname'])) $data['nickname'] = $fans['nickname'];
-                if (isset($fans['headimgurl'])) $data['headimg'] = $fans['headimgurl'];
+                $data = ['appid' => WechatService::getAppid(), 'openid' => $result['openid'], 'extra' => $fansinfo];
+                if (isset($fansinfo['unionid'])) $data['unionid'] = $fansinfo['unionid'];
+                if (isset($fansinfo['nickname'])) $data['nickname'] = $fansinfo['nickname'];
+                if (isset($fansinfo['headimgurl'])) $data['headimg'] = $fansinfo['headimgurl'];
                 $result['userinfo'] = Account::mk(static::type)->set($data, true);
                 // 返回数据给前端
                 $script[] = "window.WeChatOpenid='{$result['openid']}'";
@@ -115,49 +115,5 @@ class Wechat extends Controller
         }
         $script[] = '';
         return Response::create(join(";\n", $script))->contentType('application/javascript');
-    }
-
-    /**
-     * 网页授权测试
-     * 使用网页直接访问此链接
-     * @return string
-     */
-    public function otest(): string
-    {
-        // 生成网页授权脚本
-        $authurl = url('api.wechat/oauth', ['mode' => 1], false, true)->build();
-
-        // 返回授权测试模板
-        return <<<EOL
-<html lang="zh">
-    <head>
-        <meta charset="utf-8">
-        <title>微信网页授权测试</title>
-        <meta name="referrer" content="always">
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <style>pre{padding:20px;overflow:auto;margin-top:10px;background:#ccc;border-radius:6px;}</style>
-    </head>
-    <body>
-        <div>当前链接</div>
-        <pre>{$authurl}</pre>
-        
-        <div style="margin-top:30px">粉丝数据</div>
-        <pre id="fansdata">待网页授权，加载粉丝数据...</pre>
-        
-        <div style="margin-top:30px">用户数据</div>
-        <pre id="userdata">待网页授权，加载用户数据...</pre>
-        
-         <script referrerpolicy="unsafe-url" src="{$authurl}"></script> 
-        <script>
-            if(typeof window.WeChatFansInfo === 'object'){   
-                document.getElementById('fansdata').innerText = JSON.stringify(window.WeChatFansInfo, null, 2);
-            }
-            if(typeof window.WeChatUserInfo === 'object'){
-                document.getElementById('userdata').innerText = JSON.stringify(window.WeChatUserInfo, null, 2);
-            }
-        </script>
-    </body>
-</html>
-EOL;
     }
 }
