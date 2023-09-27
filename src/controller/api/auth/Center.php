@@ -72,9 +72,9 @@ class Center extends Auth
         $isLogin = $data['verify'] === '123456' && RuntimeService::check();
         if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
             Message::clearVerifyCode($data['phone']);
-            $user = $this->account->get();
             $bind = ['phone' => $data['phone']];
             if (!$this->account->isBind()) {
+                $user = $this->account->get();
                 $bind['headimg'] = $user['headimg'];
                 $bind['unionid'] = $user['unionid'];
                 $bind['nickname'] = $user['nickname'];

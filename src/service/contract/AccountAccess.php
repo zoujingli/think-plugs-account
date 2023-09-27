@@ -285,7 +285,7 @@ class AccountAccess implements AccountInterface
     public function check(): array
     {
         if ($this->bind->isEmpty()) {
-            throw new Exception('登录令牌无效！', 401);
+            throw new Exception('需要重新登录！', 401);
         }
         if ($this->auth->getAttr('token') !== static::tester) {
             if ($this->expire > 0 && $this->auth->getAttr('time') < time()) {
