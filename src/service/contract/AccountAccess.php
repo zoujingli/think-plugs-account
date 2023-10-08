@@ -21,6 +21,7 @@ namespace plugin\account\service\contract;
 use plugin\account\model\PluginAccountAuth;
 use plugin\account\model\PluginAccountBind;
 use plugin\account\model\PluginAccountUser;
+use plugin\account\service\Account;
 use think\admin\Exception;
 use think\admin\extend\CodeExtend;
 use think\admin\extend\JwtExtend;
@@ -86,12 +87,14 @@ class AccountAccess implements AccountInterface
      * @param \think\App $app
      * @param string $type 通道类型
      * @param string $field 授权字段
+     * @throws \think\admin\Exception
      */
     public function __construct(App $app, string $type, string $field)
     {
         $this->app = $app;
         $this->type = $type;
         $this->field = $field;
+        $this->expire = Account::expire();
     }
 
     /**

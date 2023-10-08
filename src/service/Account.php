@@ -23,6 +23,7 @@ use plugin\account\service\contract\AccountAccess;
 use plugin\account\service\contract\AccountInterface;
 use think\admin\Exception;
 use think\admin\extend\JwtExtend;
+use think\admin\Library;
 
 /**
  * 用户账号调度器
@@ -182,6 +183,25 @@ abstract class Account
         } else {
             return '';
         }
+    }
+
+    /**
+     * 接口授权有效时间
+     * @param string|integer|null $expire
+     * @return integer
+     * @throws \think\admin\Exception
+     */
+    public static function expire($expire = null): int
+    {
+        if (is_numeric($expire)) {
+            sysdata('plugin.account.access', ['expire' => $expire]);
+        } else {
+            $expire = Library::$sapp->cache->get('plugin.account.access');
+            if (is_numeric($expire)) return intval($expire);
+            $expire = intval(sysdata('plugin.account.access')['expire'] ?? 0);
+        }
+        Library::$sapp->cache->set('plugin.account.access', $expire);
+        return intval($expire);
     }
 
     /**

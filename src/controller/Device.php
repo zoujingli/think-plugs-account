@@ -51,17 +51,24 @@ class Device extends Controller
     }
 
     /**
-     * 配置终端类型
+     * 接口终端配置
      * @auth true
      * @return void
      * @throws \think\admin\Exception
      */
-    public function types()
+    public function config()
     {
         $this->types = Account::types();
+        $this->expire = Account::expire();
         if ($this->request->isGet()) {
             $this->fetch();
         } else {
+            // 设置接口有效时间
+            $expire = $this->request->post('expire');
+            if (is_numeric($expire)) {
+                Account::expire($expire);
+            }
+            // 设置开放接口通道
             $types = $this->request->post('types', []);
             foreach ($this->types as $k => $v) {
                 Account::set($k, intval(in_array($k, $types)));
