@@ -77,7 +77,8 @@ class AccountAccess implements AccountInterface
     protected $expire = 3600;
 
     /**
-     * 测试专用TOKEN
+     * 测试专用 TOKEN
+     * 主要用于接口文档演示
      * @var string
      */
     const tester = 'tester';

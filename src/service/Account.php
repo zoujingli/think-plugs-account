@@ -75,9 +75,9 @@ abstract class Account
                 throw new Exception('授权不匹配！');
             }
         }
-        if (self::field($type)) {
-            $vars = ['type' => $type, 'field' => self::$types[$type]['field']];
-            return app(AccountAccess::class, $vars)->init($token, $isjwt);
+        if ($field = self::field($type)) {
+            $vars = ['type' => $type, 'field' => $field];
+            return app(AccountAccess::class, $vars, true)->init($token, $isjwt);
         } else {
             throw new Exception('登录已超时！', 401);
         }
