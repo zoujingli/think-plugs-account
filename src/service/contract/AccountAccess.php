@@ -50,7 +50,7 @@ class AccountAccess implements AccountInterface
      * 当前用户终端
      * @var PluginAccountBind
      */
-    protected $bind;
+    protected $client;
 
     /**
      * 当前通道类型
@@ -109,10 +109,10 @@ class AccountAccess implements AccountInterface
         if (!empty($token)) {
             $map = ['type' => $this->type, 'token' => $token];
             $this->auth = PluginAccountAuth::mk()->where($map)->findOrEmpty();
-            $this->bind = $this->auth->device()->findOrEmpty();
+            $this->client = $this->auth->client()->findOrEmpty();
         } else {
             $this->auth = PluginAccountAuth::mk();
-            $this->bind = PluginAccountBind::mk();
+            $this->client = PluginAccountBind::mk();
         }
         $this->isjwt = $isjwt;
         return $this;
@@ -129,20 +129,20 @@ class AccountAccess implements AccountInterface
     {
         // 如果传入授权验证字段
         if (isset($data[$this->field])) {
-            if ($this->bind->isExists()) {
-                if ($data[$this->field] !== $this->bind->getAttr($this->field)) {
+            if ($this->client->isExists()) {
+                if ($data[$this->field] !== $this->client->getAttr($this->field)) {
                     throw new Exception('禁止强行关联！');
                 }
             } else {
                 $map = [$this->field => $data[$this->field]];
-                $this->bind = PluginAccountBind::mk()->where($map)->findOrEmpty();
+                $this->client = PluginAccountBind::mk()->where($map)->findOrEmpty();
             }
-        } elseif ($this->bind->isEmpty()) {
+        } elseif ($this->client->isEmpty()) {
             throw new Exception("字段 {$this->field} 为空！");
         }
-        $this->bind = $this->save(array_merge($data, ['type' => $this->type]));
-        if ($this->bind->isEmpty()) throw new Exception('更新资料失败！');
-        return $this->token(intval($this->bind->getAttr('id')))->get($rejwt);
+        $this->client = $this->save(array_merge($data, ['type' => $this->type]));
+        if ($this->client->isEmpty()) throw new Exception('更新资料失败！');
+        return $this->token(intval($this->client->getAttr('id')))->get($rejwt);
     }
 
     /**
@@ -152,9 +152,9 @@ class AccountAccess implements AccountInterface
      */
     public function get(bool $rejwt = false): array
     {
-        $data = $this->bind->hidden(['password'])->toArray();
-        if ($this->bind->isExists()) {
-            $data['user'] = $this->bind->user()->findOrEmpty()->toArray();
+        $data = $this->client->hidden(['password'])->toArray();
+        if ($this->client->isExists()) {
+            $data['user'] = $this->client->user()->findOrEmpty()->toArray();
             if ($rejwt) $data['token'] = $this->isjwt ? JwtExtend::token([
                 'type'  => $this->auth->getAttr('type'),
                 'token' => $this->auth->getAttr('token')
@@ -172,9 +172,9 @@ class AccountAccess implements AccountInterface
      */
     public function bind(array $map, array $data = []): array
     {
-        if ($this->bind->isEmpty()) throw new Exception('终端账号异常！');
+        if ($this->client->isEmpty()) throw new Exception('终端账号异常！');
         $user = PluginAccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
-        if ($this->bind->getAttr('unid') > 0 && ($user->isEmpty() || $this->bind->getAttr('unid') !== $user['id'])) {
+        if ($this->client->getAttr('unid') > 0 && ($user->isEmpty() || $this->client->getAttr('unid') !== $user['id'])) {
             throw new Exception("已绑定用户！");
         }
         if (!empty($data['extra'])) {
@@ -184,11 +184,18 @@ class AccountAccess implements AccountInterface
         // 生成新的用户编号
         if ($user->isEmpty()) do $check = ['code' => $data['code'] = $this->userCode()];
         while (PluginAccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
+        // 自动生成用户昵称
+        if (empty($data['nickname']) && ($user->isEmpty() || empty($user->getAttr('nickname')))) {
+            if (empty($data['nickname'] = $this->client->getAttr('nickname'))) {
+                $data['nickname'] = (Account::get($this->type)['name'] ?? $this->type) . "_{$this->client->getAttr('id')}";
+            }
+        }
         // 保存更新用户数据
         if ($user->save($data + $map) && $user->isExists()) {
-            $this->bind->save(['unid' => $user['id']]);
+            $this->client->save(['unid' => $user['id']]);
             $this->app->event->trigger('PluginAccountBind', [
-                'unid' => intval($user['id']), 'usid' => intval($this->bind->getAttr('id')),
+                'unid' => intval($user['id']),
+                'usid' => intval($this->client->getAttr('id')),
             ]);
             return $this->get();
         } else {
@@ -203,13 +210,13 @@ class AccountAccess implements AccountInterface
      */
     public function unBind(): array
     {
-        if ($this->bind->isEmpty()) {
+        if ($this->client->isEmpty()) {
             throw new Exception('终端账号异常！');
         }
-        if (($unid = $this->bind->getAttr('unid')) > 0) {
-            $this->bind->save(['unid' => 0]);
+        if (($unid = $this->client->getAttr('unid')) > 0) {
+            $this->client->save(['unid' => 0]);
             $this->app->event->trigger('PluginAccountUnbind', [
-                'unid' => $unid, 'usid' => $this->bind->getAttr('id'),
+                'unid' => $unid, 'usid' => $this->client->getAttr('id'),
             ]);
         }
         return $this->get();
@@ -221,7 +228,7 @@ class AccountAccess implements AccountInterface
      */
     public function isBind(): bool
     {
-        return $this->bind->isExists() && $this->bind->user()->findOrEmpty()->isExists();
+        return $this->client->isExists() && $this->client->user()->findOrEmpty()->isExists();
     }
 
     /**
@@ -230,7 +237,7 @@ class AccountAccess implements AccountInterface
      */
     public function isNull(): bool
     {
-        return $this->bind->isEmpty();
+        return $this->client->isEmpty();
     }
 
     /**
@@ -241,11 +248,11 @@ class AccountAccess implements AccountInterface
     {
         try {
             if ($this->isNull()) return [];
-            if ($this->isBind() && ($unid = $this->bind->getAttr('unid'))) {
+            if ($this->isBind() && ($unid = $this->client->getAttr('unid'))) {
                 $map = ['unid' => $unid, 'deleted' => 0];
                 return PluginAccountBind::mk()->where($map)->select()->toArray();
             } else {
-                return [$this->bind->refresh()->toArray()];
+                return [$this->client->refresh()->toArray()];
             }
         } catch (\Exception $exception) {
             return [];
@@ -259,7 +266,7 @@ class AccountAccess implements AccountInterface
      */
     public function delBind(int $usid): array
     {
-        if ($this->isBind() && ($unid = $this->bind->getAttr('unid'))) {
+        if ($this->isBind() && ($unid = $this->client->getAttr('unid'))) {
             $map = ['id' => $usid, 'unid' => $unid];
             PluginAccountBind::mk()->where($map)->update(['unid' => 0]);
         }
@@ -272,8 +279,8 @@ class AccountAccess implements AccountInterface
      */
     public function recode(): array
     {
-        if ($this->bind->isEmpty()) return $this->get();
-        if (($user = $this->bind->user()->findOrEmpty())->isExists()) {
+        if ($this->client->isEmpty()) return $this->get();
+        if (($user = $this->client->user()->findOrEmpty())->isExists()) {
             do $check = ['code' => $this->userCode()];
             while (PluginAccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
             $user->save($check);
@@ -288,7 +295,7 @@ class AccountAccess implements AccountInterface
      */
     public function check(): array
     {
-        if ($this->bind->isEmpty()) {
+        if ($this->client->isEmpty()) {
             throw new Exception('需要重新登录！', 401);
         }
         if ($this->auth->getAttr('token') !== static::tester) {
@@ -340,9 +347,9 @@ class AccountAccess implements AccountInterface
     private function save(array $data): PluginAccountBind
     {
         if (empty($data)) throw new Exception('资料不能为空！');
-        $data['extra'] = array_merge($this->bind->getAttr('extra'), $data['extra'] ?? []);
-        if ($this->bind->save($data) && $this->bind->isExists()) {
-            return $this->bind->refresh();
+        $data['extra'] = array_merge($this->client->getAttr('extra'), $data['extra'] ?? []);
+        if ($this->client->save($data) && $this->client->isExists()) {
+            return $this->client->refresh();
         } else {
             throw new Exception('资料保存失败！');
         }

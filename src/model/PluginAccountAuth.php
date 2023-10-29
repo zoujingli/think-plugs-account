@@ -31,7 +31,7 @@ class PluginAccountAuth extends Abs
      * 关联子账号
      * @return \think\model\relation\HasOne
      */
-    public function device(): HasOne
+    public function client(): HasOne
     {
         return $this->hasOne(PluginAccountBind::class, 'id', 'usid')->with(['user']);
     }

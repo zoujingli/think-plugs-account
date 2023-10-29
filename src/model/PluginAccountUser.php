@@ -32,7 +32,7 @@ class PluginAccountUser extends Abs
      * 关联子账号
      * @return \think\model\relation\HasMany
      */
-    public function binds(): HasMany
+    public function clients(): HasMany
     {
         return $this->hasMany(PluginAccountBind::class, 'unid', 'id');
     }
