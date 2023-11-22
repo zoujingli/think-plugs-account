@@ -81,7 +81,7 @@ class AccountAccess implements AccountInterface
      * 主要用于接口文档演示
      * @var string
      */
-    const tester = 'tester';
+    public const tester = 'tester';
 
     /**
      * 通道构造方法
