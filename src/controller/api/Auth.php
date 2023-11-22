@@ -69,6 +69,8 @@ abstract class Auth extends Controller
             $this->usid = intval($login['id'] ?? 0);
             $this->unid = intval($login['unid'] ?? 0);
             $this->type = strval($login['type'] ?? '');
+            sysvar('plugin_account_user_unid', $this->unid);
+            sysvar('plugin_account_user_usid', $this->usid);
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {

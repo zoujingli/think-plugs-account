@@ -59,7 +59,7 @@ trait MessageUsageTrait
         }
         $result = $this->send($scenes[strtolower($scene)], $phone, $params, $options);
         PluginAccountMsms::mk()->save([
-            'uuid'   => sysvar('plugin_account_user_uuid') ?: 0,
+            'uuid'   => sysvar('plugin_account_user_unid') ?: 0,
             'usid'   => sysvar('plugin_account_user_usid') ?: 0,
             'type'   => class_basename(static::class),
             'smsid'  => $result['smsid'] ?? '',
