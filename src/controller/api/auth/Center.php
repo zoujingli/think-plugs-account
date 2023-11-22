@@ -21,6 +21,7 @@ namespace plugin\account\controller\api\auth;
 use plugin\account\controller\api\Auth;
 use plugin\account\service\Message;
 use think\admin\service\RuntimeService;
+use think\admin\Storage;
 
 /**
  * 用户账号管理
@@ -41,6 +42,7 @@ class Center extends Auth
     /**
      * 修改帐号信息
      * @return void
+     * @throws \think\admin\Exception
      */
     public function set()
     {
@@ -52,6 +54,9 @@ class Center extends Auth
             'region_city.default' => '',
             'region_area.default' => '',
         ]);
+        if (!empty($data['headimg'])) {
+            $data['headimg'] = Storage::saveImage($data['headimg'], 'headimg')['url'] ?? '';
+        }
         foreach ($data as $k => $v) if ($v === '') unset($data[$k]);
         if (empty($data)) $this->success('无需修改资料！', $this->account->get());
         $this->success('修改资料成功！', $this->account->bind(['id' => $this->unid], $data));
