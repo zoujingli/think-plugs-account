@@ -136,10 +136,7 @@ class Wxapp extends Controller
     public function phone()
     {
         try {
-            $input = $this->_vali([
-                'code.require'   => '授权编码为空！',
-                'openid.require' => '用户编号为空！'
-            ]);
+            $input = $this->_vali(['code.require' => '授权编码为空！']);
             $result = Crypt::instance($this->params)->getPhoneNumber($input['code']);
             if (is_array($result)) {
                 $this->success('数据解密成功！', $result);
