@@ -111,6 +111,37 @@ class Wxapp extends Controller
                 if ($data['nickname'] === '微信用户') unset($data['headimg'], $data['nickname']);
                 $this->success('数据解密成功！', Account::mk(static::type)->set($data, true));
             } elseif (is_array($result)) {
+                if (!empty($result['phoneNumber'])) {
+                    $data = ['appid' => $this->params['appid'], 'openid' => $openid, 'unionid' => $unionid];
+                    ($account = Account::mk(static::type))->set($data);
+                    $this->success('绑定账号成功！', $account->bind(['phone' => $result['phoneNumber']], $data));
+                } else {
+                    $this->success('数据解密成功！', $result);
+                }
+            } else {
+                $this->error('数据解析失败！');
+            }
+        } catch (HttpResponseException $exception) {
+            throw $exception;
+        } catch (\Exception $exception) {
+            trace_file($exception);
+            $this->error("数据处理失败，{$exception->getMessage()}");
+        }
+    }
+
+    /**
+     * 快速获取手机号
+     * @return void
+     */
+    public function phone()
+    {
+        try {
+            $input = $this->_vali([
+                'code.require'   => '授权编码为空！',
+                'openid.require' => '用户编号为空！'
+            ]);
+            $result = Crypt::instance($this->params)->getPhoneNumber($input['code']);
+            if (is_array($result)) {
                 $this->success('数据解密成功！', $result);
             } else {
                 $this->error('数据解析失败！');
