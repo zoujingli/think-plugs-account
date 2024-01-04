@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | Account Plugin for ThinkAdmin
 // +----------------------------------------------------------------------
-// | 版权所有 2022~2023 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -23,7 +23,6 @@ use plugin\account\service\contract\AccountAccess;
 use plugin\account\service\contract\AccountInterface;
 use think\admin\Exception;
 use think\admin\extend\JwtExtend;
-use think\admin\Library;
 
 /**
  * 用户账号调度器
@@ -148,6 +147,7 @@ abstract class Account
         try {
             $all = [];
             foreach (self::init() as $type => $item) {
+                $item['code'] = $type;
                 if (is_null($status) || $item['status'] === $status) $all[$type] = $item;
             }
             return $all;
@@ -186,22 +186,21 @@ abstract class Account
     }
 
     /**
-     * 接口授权有效时间
-     * @param string|integer|null $expire
+     * 接口授权有效时间及默认头像
+     * @param string|integer|null $expire 有效时间
+     * @param string|null $headimg 默认头像
      * @return integer
      * @throws \think\admin\Exception
      */
-    public static function expire($expire = null): int
+    public static function expire($expire = null, string $headimg = null): int
     {
-        if (is_numeric($expire)) {
-            sysdata('plugin.account.access', ['expire' => $expire]);
-        } else {
-            $expire = Library::$sapp->cache->get('plugin.account.access');
-            if (is_numeric($expire)) return intval($expire);
-            $expire = intval(sysdata('plugin.account.access')['expire'] ?? 0);
+        $data = sysdata('plugin.account.access');
+        if (!is_null($expire) || !is_null($headimg)) {
+            if (!is_null($expire)) $data['expire'] = $expire;
+            if (!is_null($headimg)) $data['headimg'] = $headimg;
+            $data = sysdata('plugin.account.access', $data);
         }
-        Library::$sapp->cache->set('plugin.account.access', $expire);
-        return intval($expire);
+        return intval($data['expire'] ?? 0);
     }
 
     /**
@@ -223,5 +222,21 @@ abstract class Account
             $data = JwtExtend::verify($token);
             return static::mk($type = $data['type'] ?? '-', $data['token'] ?? '-');
         }
+    }
+
+    /**
+     * 获取默认头像
+     * @param string|null $headimg
+     * @return string
+     * @throws \think\admin\Exception
+     */
+    public static function headimg(string $headimg = null): string
+    {
+        $data = sysdata('plugin.account.access');
+        if (!is_null($headimg)) {
+            $data['headimg'] = $headimg;
+            sysdata('plugin.account.access', $data);
+        }
+        return $data['headimg'] ?? 'https://thinkadmin.top/static/img/logo.png';
     }
 }

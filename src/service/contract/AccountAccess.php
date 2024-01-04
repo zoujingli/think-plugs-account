@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | Account Plugin for ThinkAdmin
 // +----------------------------------------------------------------------
-// | 版权所有 2022~2023 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -184,18 +184,24 @@ class AccountAccess implements AccountInterface
         // 生成新的用户编号
         if ($user->isEmpty()) do $check = ['code' => $data['code'] = $this->userCode()];
         while (PluginAccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
+        // 自动绑定默认头像
+        if (empty($data['headimg']) && $user->isEmpty() || empty($user->getAttr('headimg'))) {
+            if (empty($data['headimg'] = $this->client->getAttr('headimg'))) {
+                $data['headimg'] = Account::headimg();
+            }
+        }
         // 自动生成用户昵称
         if (empty($data['nickname']) && ($user->isEmpty() || empty($user->getAttr('nickname')))) {
             if (empty($data['nickname'] = $this->client->getAttr('nickname'))) {
-                $data['nickname'] = (Account::get($this->type)['name'] ?? $this->type) . "_{$this->client->getAttr('id')}";
+                $type = Account::get($this->type)['name'] ?? $this->type;
+                $data['nickname'] = "{$type}{$this->client->getAttr('id')}";
             }
         }
         // 保存更新用户数据
         if ($user->save($data + $map) && $user->isExists()) {
             $this->client->save(['unid' => $user['id']]);
             $this->app->event->trigger('PluginAccountBind', [
-                'unid' => intval($user['id']),
-                'usid' => intval($this->client->getAttr('id')),
+                'unid' => intval($user['id']), 'usid' => intval($this->client->getAttr('id')), 'type' => $this->type,
             ]);
             return $this->get();
         } else {
@@ -216,7 +222,9 @@ class AccountAccess implements AccountInterface
         if (($unid = $this->client->getAttr('unid')) > 0) {
             $this->client->save(['unid' => 0]);
             $this->app->event->trigger('PluginAccountUnbind', [
-                'unid' => $unid, 'usid' => $this->client->getAttr('id'),
+                'unid' => intval($unid),
+                'usid' => intval($this->client->getAttr('id')),
+                'type' => $this->type
             ]);
         }
         return $this->get();
@@ -348,6 +356,15 @@ class AccountAccess implements AccountInterface
     {
         if (empty($data)) throw new Exception('资料不能为空！');
         $data['extra'] = array_merge($this->client->getAttr('extra'), $data['extra'] ?? []);
+        // 写入默认头像内容
+        if (empty($data['headimg']) && ($this->client->isEmpty() || empty($this->client->getAttr('headimg')))) {
+            $data['headimg'] = Account::headimg();
+        }
+        // 自动生成账号昵称
+        if (empty($data['nickname']) && ($this->client->isEmpty() || empty($this->client->getAttr('nickname')))) {
+            $data['nickname'] = (Account::get($this->type)['name'] ?? $this->type) . "{$this->client->getAttr('id')}";
+        }
+        // 更新写入终端账号
         if ($this->client->save($data) && $this->client->isExists()) {
             return $this->client->refresh();
         } else {

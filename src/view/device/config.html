@@ -3,8 +3,20 @@
 
         <label class="layui-form-item block relative">
             <span class="help-label"><b>令牌有效时间</b>Expire Time</span>
-            <input class="layui-input" name="expire" type="number" vali-name="令牌有效时间" data-blur-number="0" min="0" required value="{$expire|default='3600'}">
+            <input class="layui-input" name="expire" type="number" vali-name="令牌有效时间" data-blur-number="0" min="0" required value="{$data.expire|default='3600'}">
+            <span class="help-block">设置为 0 表示永不过期，建议设置有效时间达到系统自动回收令牌。</span>
         </label>
+
+        <div class="layui-form-item block relative">
+            <span class="help-label label-required-prev"><b>用户默认头像</b>Default Headimg</span>
+            <div class="layui-input-wrap">
+                <label class="relative label-required-null">
+                    <input class="layui-input layui-bg-gray" readonly name="headimg" vali-name="用户默认头像" required value="{$data.headimg|default=''}">
+                </label>
+                <i class="input-right-icon pointer layui-icon layui-icon-upload" data-file data-type="jpg,png" data-field="headimg"></i>
+            </div>
+            <span class="help-block">当用户未设置头像时，自动使用此头像设置的图片链接。</span>
+        </div>
 
         <div class="layui-form-item block relative">
             <span class="help-label label-required-prev">

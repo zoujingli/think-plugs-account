@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | Account Plugin for ThinkAdmin
 // +----------------------------------------------------------------------
-// | 版权所有 2022~2023 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -69,8 +69,10 @@ abstract class Auth extends Controller
             $this->usid = intval($login['id'] ?? 0);
             $this->unid = intval($login['unid'] ?? 0);
             $this->type = strval($login['type'] ?? '');
+            // 临时缓存登录数据
             sysvar('plugin_account_user_unid', $this->unid);
             sysvar('plugin_account_user_usid', $this->usid);
+            sysvar('plugin_account_user_type', $this->type);
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {

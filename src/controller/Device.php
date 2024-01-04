@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | Account Plugin for ThinkAdmin
 // +----------------------------------------------------------------------
-// | 版权所有 2022~2023 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -24,14 +24,14 @@ use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 
 /**
- * 终端用户管理
+ * 终端账号管理
  * @class Device
  * @package plugin\account\controller\user
  */
 class Device extends Controller
 {
     /**
-     * 终端用户管理
+     * 终端账号管理
      * @auth true
      * @menu true
      * @throws \think\db\exception\DataNotFoundException
@@ -42,7 +42,7 @@ class Device extends Controller
     {
         $this->type = $this->get['type'] ?? 'index';
         PluginAccountBind::mQuery()->layTable(function () {
-            $this->title = '终端用户管理';
+            $this->title = '终端账号管理';
             $this->types = Account::types(1);
         }, function (QueryHelper $query) {
             $query->with('user')->equal('type#utype')->like('phone,nickname,username,create_time');
@@ -59,16 +59,16 @@ class Device extends Controller
     public function config()
     {
         $this->types = Account::types();
-        $this->expire = Account::expire();
         if ($this->request->isGet()) {
+            $this->data = sysdata('plugin.account.access');
+            $this->data['headimg'] = Account::headimg();
             $this->fetch();
         } else {
-            // 设置接口有效时间
+            // 设置接口有效时间及默认头像
             $expire = $this->request->post('expire');
-            if (is_numeric($expire)) {
-                Account::expire($expire);
-            }
-            // 设置开放接口通道
+            $headimg = $this->request->post('headimg');
+            Account::expire($expire ?: 0, $headimg ?: null);
+            // 设置开放接口通道状态
             $types = $this->request->post('types', []);
             foreach ($this->types as $k => $v) {
                 Account::set($k, intval(in_array($k, $types)));
