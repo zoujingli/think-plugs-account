@@ -164,6 +164,29 @@ class AccountAccess implements AccountInterface
     }
 
     /**
+     * 验证终端密码
+     * @param string $pwd
+     * @return bool
+     */
+    public function pwdVerify(string $pwd): bool
+    {
+        return $this->client->getAttr('password') !== md5("Think{$pwd}Admin");
+    }
+
+    /**
+     * 修改终端密码
+     * @param string $pwd
+     * @return $this
+     */
+    public function pwdModify(string $pwd): AccountAccess
+    {
+        if ($this->client->isExists()) {
+            $this->client->save(['password' => md5("Think{$pwd}Admin")]);
+        }
+        return $this;
+    }
+
+    /**
      * 绑定主账号
      * @param array $map 主账号条件
      * @param array $data 主账号资料
@@ -179,8 +202,8 @@ class AccountAccess implements AccountInterface
         }
         if (!empty($data['extra'])) {
             $user->setAttr('extra', array_merge($user->getAttr('extra'), $data['extra']));
-            unset($data['extra']);
         }
+        unset($data['id'], $data['code'], $data['extra']);
         // 生成新的用户编号
         if ($user->isEmpty()) do $check = ['code' => $data['code'] = $this->userCode()];
         while (PluginAccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
