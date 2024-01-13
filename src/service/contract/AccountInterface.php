@@ -42,11 +42,11 @@ interface AccountInterface
 
     /**
      * 初始化通道
-     * @param string $token
+     * @param string|array $token
      * @param boolean $isjwt
      * @return AccountInterface
      */
-    public function init(string $token = '', bool $isjwt = true): AccountInterface;
+    public function init($token = '', bool $isjwt = true): AccountInterface;
 
     /**
      * 绑定主账号
@@ -86,6 +86,20 @@ interface AccountInterface
      * @return array
      */
     public function delBind(int $usid): array;
+
+    /**
+     * 验证终端密码
+     * @param string $pwd
+     * @return boolean
+     */
+    public function pwdVerify(string $pwd): bool;
+
+    /**
+     * 修改终端密码
+     * @param string $pwd
+     * @return boolean
+     */
+    public function pwdModify(string $pwd): bool;
 
     /**
      * 刷新账号序号

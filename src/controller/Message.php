@@ -25,7 +25,7 @@ use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 
 /**
- * 短信记录管理
+ * 手机短信管理
  * @class Message
  * @package plugin\account\controller
  */
@@ -49,7 +49,7 @@ class Message extends Controller
     }
 
     /**
-     * 短信发送记录
+     * 手机短信管理
      * @auth true
      * @menu true
      * @return void
@@ -60,7 +60,7 @@ class Message extends Controller
     public function index()
     {
         PluginAccountMsms::mQuery()->layTable(function () {
-            $this->title = '短信记录管理';
+            $this->title = '手机短信管理';
         }, static function (QueryHelper $query) {
             $query->equal('status')->like('smsid,scene,phone')->dateBetween('create_time');
         });

@@ -27,7 +27,6 @@ use think\model\relation\HasMany;
  */
 class PluginAccountUser extends Abs
 {
-
     /**
      * 关联子账号
      * @return \think\model\relation\HasMany
@@ -35,25 +34,5 @@ class PluginAccountUser extends Abs
     public function clients(): HasMany
     {
         return $this->hasMany(PluginAccountBind::class, 'unid', 'id');
-    }
-
-    /**
-     * 字段属性处理
-     * @param mixed $value
-     * @return string
-     */
-    public function setExtraAttr($value): string
-    {
-        return is_string($value) ? $value : json_encode($value, JSON_UNESCAPED_UNICODE);
-    }
-
-    /**
-     * 字段属性处理
-     * @param mixed $value
-     * @return array
-     */
-    public function getExtraAttr($value): array
-    {
-        return empty($value) ? [] : (is_string($value) ? json_decode($value, true) : $value);
     }
 }

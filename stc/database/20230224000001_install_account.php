@@ -205,6 +205,7 @@ class InstallAccount extends Migrator
             ->addIndex('email', ['name' => 'idx_plugin_account_user_email'])
             ->addIndex('unionid', ['name' => 'idx_plugin_account_user_unionid'])
             ->addIndex('username', ['name' => 'idx_plugin_account_user_username'])
+            ->addIndex('nickname', ['name' => 'idx_plugin_account_user_nickname'])
             ->addIndex('region_prov', ['name' => 'idx_plugin_account_user_region_prov'])
             ->addIndex('region_city', ['name' => 'idx_plugin_account_user_region_city'])
             ->addIndex('region_area', ['name' => 'idx_plugin_account_user_region_area'])

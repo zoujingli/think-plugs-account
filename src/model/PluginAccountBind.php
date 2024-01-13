@@ -48,33 +48,15 @@ class PluginAccountBind extends Abs
     }
 
     /**
-     * 字段属性处理
-     * @param mixed $value
-     * @return string
-     */
-    public function setExtraAttr($value): string
-    {
-        return is_string($value) ? $value : json_encode($value, JSON_UNESCAPED_UNICODE);
-    }
-
-    /**
-     * 字段属性处理
-     * @param mixed $value
-     * @return array
-     */
-    public function getExtraAttr($value): array
-    {
-        return empty($value) ? [] : (is_string($value) ? json_decode($value, true) : $value);
-    }
-
-    /**
      * 增加通道名称显示
      * @return array
      */
     public function toArray(): array
     {
         $data = parent::toArray();
-        $data['type_name'] = Account::get($data['type'])['name'] ?? $data['type'];
+        if (isset($data['type'])) {
+            $data['type_name'] = Account::get($data['type'])['name'] ?? $data['type'];
+        }
         return $data;
     }
 }

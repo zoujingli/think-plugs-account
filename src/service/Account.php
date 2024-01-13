@@ -54,27 +54,24 @@ abstract class Account
     /**
      * 创建账号实例
      * @param string $type 通道编号
-     * @param string $token 认证令牌
+     * @param string|array $token 令牌或条件
      * @param boolean $isjwt 是否JWT模式
      * @return AccountInterface
      * @throws \think\admin\Exception
      */
-    public static function mk(string $type, string $token = '', bool $isjwt = true): AccountInterface
+    public static function mk(string $type, $token = '', bool $isjwt = true): AccountInterface
     {
         if ($token === AccountAccess::tester) {
             if (empty($type)) {
                 $type = PluginAccountAuth::mk()->where(['token' => $token])->value('type');
                 if (empty($type)) throw new Exception('账号不存在！');
             }
-        } elseif ($isjwt && strlen($token) > 32) {
+        } elseif ($isjwt && is_string($token) && strlen($token) > 32) {
             $data = JwtExtend::verify($token);
-            $type = $type ?: ($data['type'] ?? '');
-            $token = $data['token'] ?? $token;
-            if (isset($data['type']) && $data['type'] !== $type) {
-                throw new Exception('授权不匹配！');
-            }
+            [$type, $token] = [$type ?: ($data['type'] ?? ''), $data['token'] ?? $token];
+            if (($data['type'] ?? '') !== $type) throw new Exception('授权不匹配！');
         }
-        if ($field = self::field($type)) {
+        if (($field = self::field($type)) || is_array($token)) {
             $vars = ['type' => $type, 'field' => $field];
             return app(AccountAccess::class, $vars, true)->init($token, $isjwt);
         } else {
@@ -115,7 +112,7 @@ abstract class Account
      * 设置通道状态
      * @param string $type 通道编号
      * @param integer $status 通道状态
-     * @return bool
+     * @return boolean
      */
     public static function set(string $type, int $status): bool
     {
@@ -139,7 +136,7 @@ abstract class Account
 
     /**
      * 获取全部通道
-     * @param ?int $status 指定状态
+     * @param ?integer $status 指定状态
      * @return array
      */
     public static function types(?int $status = null): array

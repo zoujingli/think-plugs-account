@@ -24,6 +24,7 @@ use think\admin\Exception;
 /**
  * 短信通用接口
  * @class MessageUsageTrait
+ * @package plugin\account\service\contract
  */
 trait MessageUsageTrait
 {
@@ -59,8 +60,8 @@ trait MessageUsageTrait
         }
         $result = $this->send($scenes[strtolower($scene)], $phone, $params, $options);
         PluginAccountMsms::mk()->save([
-            'uuid'   => sysvar('plugin_account_user_unid') ?: 0,
-            'usid'   => sysvar('plugin_account_user_usid') ?: 0,
+            'uuid'   => intval(sysvar('plugin_account_user_unid')),
+            'usid'   => intval(sysvar('plugin_account_user_usid')),
             'type'   => class_basename(static::class),
             'smsid'  => $result['smsid'] ?? '',
             'scene'  => $scene,

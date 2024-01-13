@@ -22,7 +22,7 @@ namespace plugin\account\service\contract;
 
 /**
  * 通用短信接口类
- * @class AccountInterface
+ * @class MessageInterface
  * @package plugin\account\service\contract
  */
 interface MessageInterface

@@ -18,6 +18,7 @@ declare (strict_types=1);
 
 namespace plugin\account\controller\api;
 
+use app\wechat\service\WechatService;
 use plugin\account\service\Account;
 use think\admin\Controller;
 use think\exception\HttpResponseException;
@@ -51,13 +52,8 @@ class Wxapp extends Controller
      */
     protected function initialize()
     {
-        if (Account::field(static::type)) {
-            $wxapp = sysdata('plugin.wechat.wxapp');
-            $this->params = [
-                'appid'      => $wxapp['appid'] ?? '',
-                'appsecret'  => $wxapp['appkey'] ?? '',
-                'cache_path' => syspath('runtime/wechat'),
-            ];
+        if (Account::field(self::type)) {
+            $this->params = WechatService::getWxconf();
         } else {
             $this->error('接口未开通！');
         }
@@ -77,7 +73,7 @@ class Wxapp extends Controller
                 'unionid'     => $unionid,
                 'session_key' => $sesskey,
             ];
-            $this->success('授权换取成功！', Account::mk(static::type)->set($data, true));
+            $this->success('授权换取成功！', Account::mk(self::type)->set($data, true));
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -109,11 +105,11 @@ class Wxapp extends Controller
                     'nickname' => $result['nickName'],
                 ];
                 if ($data['nickname'] === '微信用户') unset($data['headimg'], $data['nickname']);
-                $this->success('数据解密成功！', Account::mk(static::type)->set($data, true));
+                $this->success('数据解密成功！', Account::mk(self::type)->set($data, true));
             } elseif (is_array($result)) {
                 if (!empty($result['phoneNumber'])) {
                     $data = ['appid' => $this->params['appid'], 'openid' => $openid, 'unionid' => $unionid];
-                    ($account = Account::mk(static::type))->set($data);
+                    ($account = Account::mk(self::type))->set($data);
                     $account->bind(['phone' => $result['phoneNumber']], $data);
                     $this->success('绑定账号成功！', $account->get(true));
                 } else {

@@ -70,9 +70,9 @@ abstract class Auth extends Controller
             $this->unid = intval($login['unid'] ?? 0);
             $this->type = strval($login['type'] ?? '');
             // 临时缓存登录数据
-            sysvar('plugin_account_user_unid', $this->unid);
-            sysvar('plugin_account_user_usid', $this->usid);
             sysvar('plugin_account_user_type', $this->type);
+            sysvar('plugin_account_user_usid', $this->usid);
+            sysvar('plugin_account_user_unid', $this->unid);
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -83,20 +83,21 @@ abstract class Auth extends Controller
     /**
      * 检查用户状态
      * @param boolean $isBind
-     * @return void
+     * @return $this
      */
-    protected function checkUserStatus(bool $isBind = true)
+    protected function checkUserStatus(bool $isBind = true): Auth
     {
         $login = $this->account->get();
         if (empty($login['status'])) {
-            $this->error('终端已冻结！', $login);
+            $this->error('终端已冻结！', $login, 403);
         } elseif ($isBind) {
             if (empty($login['user'])) {
                 $this->error('请完善资料！', $login, 402);
             }
             if (empty($login['user']['status'])) {
-                $this->error('账号已冻结！', $login);
+                $this->error('账号已冻结！', $login, 403);
             }
         }
+        return $this;
     }
 }
