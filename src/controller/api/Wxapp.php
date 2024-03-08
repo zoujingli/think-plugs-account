@@ -38,7 +38,7 @@ class Wxapp extends Controller
      * 接口通道类型
      * @var string
      */
-    private const type = Account::WXAPP;
+    private $type = Account::WXAPP;
 
     /**
      * 小程序配置参数
@@ -52,7 +52,7 @@ class Wxapp extends Controller
      */
     protected function initialize()
     {
-        if (Account::field(self::type)) {
+        if (Account::field($this->type)) {
             $this->params = WechatService::getWxconf();
         } else {
             $this->error('接口未开通！');
@@ -73,7 +73,7 @@ class Wxapp extends Controller
                 'unionid'     => $unionid,
                 'session_key' => $sesskey,
             ];
-            $this->success('授权换取成功！', Account::mk(self::type)->set($data, true));
+            $this->success('授权换取成功！', Account::mk($this->type)->set($data, true));
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -105,11 +105,11 @@ class Wxapp extends Controller
                     'nickname' => $result['nickName'],
                 ];
                 if ($data['nickname'] === '微信用户') unset($data['headimg'], $data['nickname']);
-                $this->success('数据解密成功！', Account::mk(self::type)->set($data, true));
+                $this->success('数据解密成功！', Account::mk($this->type)->set($data, true));
             } elseif (is_array($result)) {
                 if (!empty($result['phoneNumber'])) {
                     $data = ['appid' => $this->params['appid'], 'openid' => $openid, 'unionid' => $unionid];
-                    ($account = Account::mk(self::type))->set($data);
+                    ($account = Account::mk($this->type))->set($data);
                     $account->bind(['phone' => $result['phoneNumber']], $data);
                     $this->success('绑定账号成功！', $account->get(true));
                 } else {
@@ -154,7 +154,7 @@ class Wxapp extends Controller
     /**
      * 换取会话授权
      * @param string $code 授权编号
-     * @return array [openid, unionid, sessionkey]
+     * @return void|array [openid, unionid, sessionkey]
      */
     private function applySesskey(string $code): array
     {
@@ -180,7 +180,7 @@ class Wxapp extends Controller
 
     /**
      * 获取小程序码
-     * @return \think\Response
+     * @return void|\think\Response
      */
     public function qrcode(): Response
     {
