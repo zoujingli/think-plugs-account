@@ -21,18 +21,24 @@ use think\migration\Migrator;
 
 /**
  * 数据库更新补丁
- * @class UpdateAccount20240308
+ * @class InstallAccount20240308
  * @package think\migration\Migrator
  */
-class UpdateAccount20240308 extends Migrator
+class InstallAccount20240308 extends Migrator
 {
     /**
      * 更新数据库
      */
     public function change()
     {
-        // 更新数据库字段
+        // 短信记录表修正字段
         $table = $this->table('plugin_account_msms');
         $table->hasColumn('unid') || $table->renameColumn('uuid', 'unid')->update();
+
+        // 用户表增加密码字段
+        $table = $this->table('plugin_account_user');
+        $table->hasColumn('password') || $table->addColumn('password', 'string', [
+            'limit' => 32, 'default' => '', 'null' => true, 'after' => 'nickname', 'comment' => '登录密码'
+        ])->update();
     }
 }

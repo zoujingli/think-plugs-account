@@ -157,7 +157,7 @@ class AccountAccess implements AccountInterface
     {
         $data = $this->client->hidden(['sort', 'password'])->toArray();
         if ($this->client->isExists()) {
-            $data['user'] = $this->client->user()->findOrEmpty()->hidden(['sort'])->toArray();
+            $data['user'] = $this->client->user()->findOrEmpty()->hidden(['sort', 'password'])->toArray();
             if ($rejwt) $data['token'] = $this->isjwt ? JwtExtend::token([
                 'type'  => $this->access->getAttr('type'),
                 'token' => $this->access->getAttr('token')
@@ -173,7 +173,11 @@ class AccountAccess implements AccountInterface
      */
     public function pwdVerify(string $pwd): bool
     {
-        return $this->client->getAttr('password') !== md5("Think{$pwd}Admin");
+        $password = md5("Think{$pwd}Admin");
+        if (($user = $this->client->user()->findOrEmpty())->isExists()) {
+            if ($user->getAttr('password') === $password) return true;
+        }
+        return $this->client->getAttr('password') !== $password;
     }
 
     /**
@@ -184,7 +188,10 @@ class AccountAccess implements AccountInterface
     public function pwdModify(string $pwd): bool
     {
         if ($this->client->isEmpty()) return false;
-        return $this->client->save(['password' => md5("Think{$pwd}Admin")]);
+        $data = ['password' => md5("Think{$pwd}Admin")];
+        $user = $this->client->user()->findOrEmpty();
+        $user->isExists() && $user->save($data);
+        return $this->client->save($data);
     }
 
     /**
