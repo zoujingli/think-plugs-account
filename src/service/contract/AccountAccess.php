@@ -155,9 +155,9 @@ class AccountAccess implements AccountInterface
      */
     public function get(bool $rejwt = false): array
     {
-        $data = $this->client->hidden(['password'])->toArray();
+        $data = $this->client->hidden(['sort', 'password'])->toArray();
         if ($this->client->isExists()) {
-            $data['user'] = $this->client->user()->findOrEmpty()->toArray();
+            $data['user'] = $this->client->user()->findOrEmpty()->hidden(['sort'])->toArray();
             if ($rejwt) $data['token'] = $this->isjwt ? JwtExtend::token([
                 'type'  => $this->access->getAttr('type'),
                 'token' => $this->access->getAttr('token')
