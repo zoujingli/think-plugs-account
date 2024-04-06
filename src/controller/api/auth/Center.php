@@ -22,6 +22,7 @@ use plugin\account\controller\api\Auth;
 use plugin\account\service\Message;
 use think\admin\service\RuntimeService;
 use think\admin\Storage;
+use think\exception\HttpResponseException;
 
 /**
  * 用户账号管理
@@ -42,52 +43,61 @@ class Center extends Auth
     /**
      * 修改帐号信息
      * @return void
-     * @throws \think\admin\Exception
      */
     public function set()
     {
-        $this->checkUserStatus();
-        $data = $this->_vali([
-            'headimg.default'     => '',
-            'nickname.default'    => '',
-            'region_prov.default' => '',
-            'region_city.default' => '',
-            'region_area.default' => '',
-        ]);
-        if (!empty($data['headimg'])) {
-            $data['headimg'] = Storage::saveImage($data['headimg'], 'headimg')['url'] ?? '';
+        try {
+            $data = $this->checkUserStatus()->_vali([
+                'headimg.default'     => '',
+                'nickname.default'    => '',
+                'region_prov.default' => '',
+                'region_city.default' => '',
+                'region_area.default' => '',
+            ]);
+            if (!empty($data['headimg'])) {
+                $data['headimg'] = Storage::saveImage($data['headimg'], 'headimg')['url'] ?? '';
+            }
+            foreach ($data as $k => $v) if ($v === '') unset($data[$k]);
+            if (empty($data)) $this->success('无需修改资料！', $this->account->get());
+            $this->success('修改资料成功！', $this->account->bind(['id' => $this->unid], $data));
+        } catch (HttpResponseException $exception) {
+            throw $exception;
+        } catch (\Exception $exception) {
+            $this->error($exception->getMessage());
         }
-        foreach ($data as $k => $v) if ($v === '') unset($data[$k]);
-        if (empty($data)) $this->success('无需修改资料！', $this->account->get());
-        $this->success('修改资料成功！', $this->account->bind(['id' => $this->unid], $data));
     }
 
     /**
      * 绑定主账号
      * @return void
-     * @throws \think\admin\Exception
      */
     public function bind()
     {
-        $data = $this->_vali([
-            'phone.mobile'   => '手机号错误！',
-            'phone.require'  => '手机号为空！',
-            'verify.require' => '验证码为空！',
-        ]);
-        $isLogin = $data['verify'] === '123456' && RuntimeService::check();
-        if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
-            Message::clearVerifyCode($data['phone']);
-            $bind = ['phone' => $data['phone']];
-            if (!$this->account->isBind()) {
-                $user = $this->account->get();
-                $bind['headimg'] = $user['headimg'];
-                $bind['unionid'] = $user['unionid'];
-                $bind['nickname'] = $user['nickname'];
+        try {
+            $data = $this->_vali([
+                'phone.mobile'   => '手机号错误！',
+                'phone.require'  => '手机号为空！',
+                'verify.require' => '验证码为空！',
+            ]);
+            $isLogin = $data['verify'] === '123456' && RuntimeService::check();
+            if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
+                Message::clearVerifyCode($data['phone']);
+                $bind = ['phone' => $data['phone']];
+                if (!$this->account->isBind()) {
+                    $user = $this->account->get();
+                    $bind['headimg'] = $user['headimg'];
+                    $bind['unionid'] = $user['unionid'];
+                    $bind['nickname'] = $user['nickname'];
+                }
+                $this->account->bind(['phone' => $bind['phone']], $bind);
+                $this->success('账号关联成功!', $this->account->get());
+            } else {
+                $this->error('短信验证失败！');
             }
-            $this->account->bind(['phone' => $bind['phone']], $bind);
-            $this->success('账号关联成功!', $this->account->get());
-        } else {
-            $this->error('短信验证失败！');
+        } catch (HttpResponseException $exception) {
+            throw $exception;
+        } catch (\Exception $exception) {
+            $this->error($exception->getMessage());
         }
     }
 
