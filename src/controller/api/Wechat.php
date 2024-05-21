@@ -65,7 +65,7 @@ class Wechat extends Controller
             $this->wechat = WechatService::instance();
             $this->source = input('source') ?: $this->request->server('http_referer', $this->request->url(true));
         } else {
-            $this->error('接口未开通！');
+            $this->error('接口未开通');
         }
     }
 

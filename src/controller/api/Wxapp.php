@@ -55,7 +55,7 @@ class Wxapp extends Controller
         if (Account::field($this->type)) {
             $this->params = WechatService::getWxconf();
         } else {
-            $this->error('接口未开通！');
+            $this->error('接口未开通');
         }
     }
 
@@ -65,7 +65,7 @@ class Wxapp extends Controller
     public function session()
     {
         try {
-            $input = $this->_vali(['code.require' => '凭证编码为空！']);
+            $input = $this->_vali(['code.require' => '凭证编码为空']);
             [$openid, $unionid, $sesskey] = $this->applySesskey($input['code']);
             $data = [
                 'appid'       => $this->params['appid'],
@@ -73,7 +73,7 @@ class Wxapp extends Controller
                 'unionid'     => $unionid,
                 'session_key' => $sesskey,
             ];
-            $this->success('授权换取成功！', Account::mk($this->type)->set($data, true));
+            $this->success('授权换取成功', Account::mk($this->type)->set($data, true));
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -89,9 +89,9 @@ class Wxapp extends Controller
     {
         try {
             $input = $this->_vali([
-                'iv.require'        => '解密向量为空！',
-                'code.require'      => '授权编码为空！',
-                'encrypted.require' => '密文内容为空！',
+                'iv.require'        => '解密向量为空',
+                'code.require'      => '授权编码为空',
+                'encrypted.require' => '密文内容为空',
             ]);
             [$openid, $unionid, $input['session_key']] = $this->applySesskey($input['code']);
             $result = Crypt::instance($this->params)->decode($input['iv'], $input['session_key'], $input['encrypted']);
@@ -105,24 +105,24 @@ class Wxapp extends Controller
                     'nickname' => $result['nickName'],
                 ];
                 if ($data['nickname'] === '微信用户') unset($data['headimg'], $data['nickname']);
-                $this->success('数据解密成功！', Account::mk($this->type)->set($data, true));
+                $this->success('解密成功', Account::mk($this->type)->set($data, true));
             } elseif (is_array($result)) {
                 if (!empty($result['phoneNumber'])) {
                     $data = ['appid' => $this->params['appid'], 'openid' => $openid, 'unionid' => $unionid];
                     ($account = Account::mk($this->type))->set($data);
                     $account->bind(['phone' => $result['phoneNumber']], $data);
-                    $this->success('绑定账号成功！', $account->get(true));
+                    $this->success('绑定成功', $account->get(true));
                 } else {
-                    $this->success('数据解密成功！', $result);
+                    $this->success('解密成功', $result);
                 }
             } else {
-                $this->error('数据解析失败！');
+                $this->error('解析失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             trace_file($exception);
-            $this->error("数据处理失败，{$exception->getMessage()}");
+            $this->error("处理失败，{$exception->getMessage()}");
         }
     }
 
@@ -134,20 +134,20 @@ class Wxapp extends Controller
     {
         try {
             $input = $this->_vali([
-                'code.require'   => '授权编码为空！',
-                'openid.require' => '用户编号为空！'
+                'code.require'   => '授权编码为空',
+                'openid.require' => '用户编号为空'
             ]);
             $result = Crypt::instance($this->params)->getPhoneNumber($input['code']);
             if (is_array($result)) {
-                $this->success('数据解密成功！', $result);
+                $this->success('解密成功', $result);
             } else {
-                $this->error('数据解析失败！');
+                $this->error('解析失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             trace_file($exception);
-            $this->error("数据处理失败，{$exception->getMessage()}");
+            $this->error("处理失败，{$exception->getMessage()}");
         }
     }
 
@@ -168,13 +168,13 @@ class Wxapp extends Controller
                 $this->app->cache->set($code, $result, 7200);
                 return [$result['openid'], $result['unionid'] ?? '', $result['session_key']];
             } else {
-                $this->error($result['errmsg'] ?? '授权换取失败！');
+                $this->error($result['errmsg'] ?? '换取失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             trace_file($exception);
-            $this->error("换取授权失败，{$exception->getMessage()}");
+            $this->error("授权失败，{$exception->getMessage()}");
         }
     }
 
@@ -188,11 +188,11 @@ class Wxapp extends Controller
             $data = $this->_vali([
                 'size.default' => 430,
                 'type.default' => 'base64',
-                'path.require' => '跳转链接为空！',
+                'path.require' => '跳转链接为空',
             ]);
             $result = Qrcode::instance($this->params)->createMiniPath($data['path'], $data['size']);
             if ($data['type'] === 'base64') {
-                $this->success('生成小程序码！', ['base64' => 'data:image/png;base64,' . base64_encode($result)]);
+                $this->success('生成小程序码', ['base64' => 'data:image/png;base64,' . base64_encode($result)]);
             } else {
                 return response($result)->contentType('image/png');
             }
@@ -212,7 +212,7 @@ class Wxapp extends Controller
         try {
             $data = $this->_vali(['start.default' => 0, 'limit.default' => 10]);
             $list = Live::instance($this->params)->getLiveList($data['start'], $data['limit']);
-            $this->success('获取直播列表！', $list);
+            $this->success('直播列表', $list);
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -231,10 +231,10 @@ class Wxapp extends Controller
                 'start.default'   => 0,
                 'limit.default'   => 10,
                 'action.default'  => 'get_replay',
-                'room_id.require' => '直播间号为空！',
+                'room_id.require' => '直播间号为空',
             ]);
             $result = Live::instance($this->params)->getLiveInfo($data);
-            $this->success('获取回放列表！', $result);
+            $this->success('回放列表', $result);
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {

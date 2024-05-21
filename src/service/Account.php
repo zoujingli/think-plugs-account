@@ -222,6 +222,16 @@ abstract class Account
     }
 
     /**
+     * 是否自动注册
+     * @return boolean
+     * @throws \think\admin\Exception
+     */
+    public static function enableAutoReigster(): bool
+    {
+        return empty(sysdata('plugin.account.access')['disRegister']);
+    }
+
+    /**
      * 获取默认头像
      * @param string|null $headimg
      * @return string

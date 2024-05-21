@@ -1,5 +1,5 @@
 <form action="{:sysuri()}" method="post" data-auto="true" class="layui-form layui-card">
-    <div class="layui-card-body padding-left-40">
+    <div class="layui-card-body ta-pl-40">
 
         <label class="layui-form-item block relative">
             <span class="help-label"><b>令牌有效时间</b>Expire Time</span>
@@ -7,11 +7,29 @@
             <span class="help-block">设置为 0 表示永不过期，建议设置有效时间达到系统自动回收令牌。</span>
         </label>
 
+
+        <div class="layui-form-item block relative">
+            <span class="help-label label-required-prev"><b>登录自动注册</b>Auto Register</span>
+            <div class="layui-textarea help-checks">
+                {empty name='data.disRegister'}{php}$data['disRegister']=0;{/php}{/empty}
+                {foreach ['启用自动注册','禁止自动注册'] as $k=>$v}
+                <label class="think-radio">
+                    {if isset($data.disRegister) and $data.disRegister eq $k}
+                    <input type="radio" name="disRegister" value="{$k}" lay-ignore checked> {$v}
+                    {else}
+                    <input type="radio" name="disRegister" value="{$k}" lay-ignore> {$v}
+                    {/if}
+                </label>
+                {/foreach}
+            </div>
+            <span class="help-block">启用自动登录时，通过验证码登录时账号不存在会自动创建！</span>
+        </div>
+
         <div class="layui-form-item block relative">
             <span class="help-label label-required-prev"><b>用户默认头像</b>Default Headimg</span>
             <div class="layui-input-wrap">
                 <label class="relative label-required-null">
-                    <input class="layui-input layui-bg-gray" readonly name="headimg" vali-name="用户默认头像" required value="{$data.headimg|default=''}">
+                    <input class="layui-input layui-bg-gray" data-tips-hover data-tips-image readonly name="headimg" vali-name="用户默认头像" required value="{$data.headimg|default=''}">
                 </label>
                 <i class="input-right-icon pointer layui-icon layui-icon-upload" data-file data-type="jpg,png" data-field="headimg"></i>
             </div>

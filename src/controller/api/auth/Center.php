@@ -37,7 +37,7 @@ class Center extends Auth
      */
     public function get()
     {
-        $this->success('获取资料成功！', $this->account->get());
+        $this->success('获取资料', $this->account->get());
     }
 
     /**
@@ -50,16 +50,23 @@ class Center extends Auth
             $data = $this->checkUserStatus()->_vali([
                 'headimg.default'     => '',
                 'nickname.default'    => '',
+                'password.default'    => '',
                 'region_prov.default' => '',
                 'region_city.default' => '',
                 'region_area.default' => '',
             ]);
+            // 保存用户头像
             if (!empty($data['headimg'])) {
                 $data['headimg'] = Storage::saveImage($data['headimg'], 'headimg')['url'] ?? '';
             }
+            // 修改登录密码
+            if (!empty($data['password']) && strlen($data['password']) > 4) {
+                $this->account->pwdModify($data['password']);
+                unset($data['password']);
+            }
             foreach ($data as $k => $v) if ($v === '') unset($data[$k]);
-            if (empty($data)) $this->success('无需修改资料！', $this->account->get());
-            $this->success('修改资料成功！', $this->account->bind(['id' => $this->unid], $data));
+            if (empty($data)) $this->success('无需修改', $this->account->get());
+            $this->success('修改成功', $this->account->bind(['id' => $this->unid], $data));
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -75,9 +82,9 @@ class Center extends Auth
     {
         try {
             $data = $this->_vali([
-                'phone.mobile'   => '手机号错误！',
-                'phone.require'  => '手机号为空！',
-                'verify.require' => '验证码为空！',
+                'phone.mobile'   => '手机号错误',
+                'phone.require'  => '手机号为空',
+                'verify.require' => '验证码为空',
             ]);
             $isLogin = $data['verify'] === '123456' && RuntimeService::check();
             if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
@@ -90,9 +97,9 @@ class Center extends Auth
                     $bind['nickname'] = $user['nickname'];
                 }
                 $this->account->bind(['phone' => $bind['phone']], $bind);
-                $this->success('账号关联成功!', $this->account->get());
+                $this->success('关联成功!', $this->account->get());
             } else {
-                $this->error('短信验证失败！');
+                $this->error('验证失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -108,6 +115,6 @@ class Center extends Auth
     public function unbind()
     {
         $this->account->unBind();
-        $this->success('解除关联成功！', $this->account->get());
+        $this->success('关联成功', $this->account->get());
     }
 }

@@ -64,6 +64,8 @@ class Device extends Controller
             $this->data['headimg'] = Account::headimg();
             $this->fetch();
         } else {
+            // 保存当前参数
+            sysdata('plugin.account.access', $this->request->post());
             // 设置接口有效时间及默认头像
             $expire = $this->request->post('expire');
             $headimg = $this->request->post('headimg');
@@ -91,5 +93,14 @@ class Device extends Controller
             'status.in:0,1'  => '状态值范围异常！',
             'status.require' => '状态值不能为空！',
         ]));
+    }
+
+    /**
+     * 删除终端账号
+     * @auth true
+     */
+    public function remove()
+    {
+        PluginAccountBind::mDelete();
     }
 }

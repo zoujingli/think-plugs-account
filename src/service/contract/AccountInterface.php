@@ -49,6 +49,24 @@ interface AccountInterface
     public function init($token = '', bool $isjwt = true): AccountInterface;
 
     /**
+     * 获取终端类型
+     * @return string
+     */
+    public function type(): string;
+
+    /**
+     * 获取用户编号
+     * @return integer
+     */
+    public function unid(): int;
+
+    /**
+     * 获取终端编号
+     * @return integer
+     */
+    public function usid(): int;
+
+    /**
      * 绑定主账号
      * @param array $map 主账号条件
      * @param array $data 主账号资料
@@ -116,11 +134,10 @@ interface AccountInterface
 
     /**
      * 生成授权令牌
-     * @param integer $usid
      * @return \plugin\account\service\contract\AccountInterface
      * @throws \think\db\exception\DbException
      */
-    public function token(int $usid): AccountInterface;
+    public function token(): AccountInterface;
 
     /**
      * 延期令牌时间

@@ -18,9 +18,17 @@
 
         <div class="layui-form-item layui-inline">
             <label class="layui-form-label">业务场景</label>
-            <label class="layui-input-inline">
-                <input class="layui-input" name="scene" placeholder="请输入业务场景" value="{$get.scene|default=''}">
-            </label>
+            <div class="layui-input-inline">
+                <select class="layui-select" name="scene">
+                    <option value="">-- 全部 --</option>
+                    {foreach $scenes as $k => $v}
+                    {if isset($get.scene) and $get.scene eq $k}
+                    <option selected value="{$k}">{$v}</option>
+                    {else}
+                    <option value="{$k}">{$v}</option>
+                    {/if}{/foreach}
+                </select>
+            </div>
         </div>
 
         <div class="layui-form-item layui-inline layui-hide">
