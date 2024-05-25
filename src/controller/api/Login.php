@@ -60,15 +60,15 @@ class Login extends Controller
                     $account = Account::mk('', $inset);
                     if ($account->isNull()) $this->error('手机未注册');
                     // 如果当前终端账号不存在则创建
-                    if ($account->type() !== $data['type']) {
+                    if ($account->getType() !== $data['type']) {
                         $account = Account::mk($data['type'], $inset);
-                        $account->isNull() && $account->set($inset) && $account->bind($inset, $inset);
+                        $account->isNull() && $account->set($inset);
                     }
                 }
                 $account->isBind() || $account->bind($inset, $inset);
                 $this->success('登录成功', $account->expire()->get(true));
             } else {
-                $this->error('验证失败');
+                $this->error('短信验证失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -87,12 +87,15 @@ class Login extends Controller
             $data = $this->_vali(['code.require' => '授权编号为空！']);
             $vars = CodeExtend::decrypt($data['code'], JwtExtend::jwtkey());
             if (is_array($vars) && isset($vars['unid'])) {
-                $account = Account::mk(Account::WAP, ['unid' => $vars['unid']]);
-                if ($account->isNull()) {
-                    $this->error('登录失败！');
-                } else {
-                    $this->success('登录成功！', $account->token()->get(true));
+                $account = Account::mk('', ['unid' => $vars['unid'], 'deleted' => 0]);
+                if ($account->isNull()) $this->error('登录失败！');
+                if ($account->getType() !== Account::WAP) {
+                    $inset = ['phone' => $account->get()['phone']];
+                    $account = Account::mk(Account::WAP, $inset);
+                    $account->isNull() && $account->set($inset);
+                    $account->isBind() || $account->bind($inset, $inset);
                 }
+                $this->success('登录成功！', $account->token()->get(true));
             } else {
                 $this->error('解密失败！');
             }
@@ -130,12 +133,12 @@ class Login extends Controller
             if ($account->isNull()) $this->error('手机未注册');
             if ($account->pwdVerify($data['password'])) {
                 // 如果当前终端账号不存在则创建
-                if ($account->type() !== $data['type']) {
+                if ($account->getType() !== $data['type']) {
                     $account = Account::mk($data['type'], $inset);
-                    $account->isNull() && $account->set($inset) && $account->bind($inset, $inset);
+                    $account->isNull() && $account->set($inset);
                 }
                 $account->isBind() || $account->bind($inset, $inset);
-                $this->success('登录成功', $account->get(true));
+                $this->success('登录成功', $account->expire()->get(true));
             } else {
                 $this->error('密码错误');
             }
@@ -168,7 +171,7 @@ class Login extends Controller
                 $account->pwdModify($data['passwd']);
                 $this->success('重置成功', $account->expire()->get(true));
             } else {
-                $this->error('验证失败');
+                $this->error('验证码错误');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -202,7 +205,7 @@ class Login extends Controller
                 $this->app->event->trigger('PluginAccountRegister', $account);
                 $this->success('注册成功', $account->get(true));
             } else {
-                $this->error('验证失败');
+                $this->error('短信验证失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -233,7 +236,7 @@ class Login extends Controller
                 $this->error('无效通道');
             }
         } else {
-            $this->error('验证失败');
+            $this->error('验证码错误');
         }
     }
 
@@ -249,7 +252,9 @@ class Login extends Controller
         ];
         $image = ImageVerify::render($images[array_rand($images)]);
         $this->success('生成拼图成功', [
-            'bgimg' => $image['bgimg'], 'water' => $image['water'], 'uniqid' => $image['code'],
+            'bgimg'  => $image['bgimg'],
+            'water'  => $image['water'],
+            'uniqid' => $image['code'],
         ]);
     }
 

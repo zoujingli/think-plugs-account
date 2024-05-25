@@ -85,19 +85,23 @@ class Center extends Auth
                 'phone.mobile'   => '手机号错误',
                 'phone.require'  => '手机号为空',
                 'verify.require' => '验证码为空',
+                'passwd.default' => ''
             ]);
-            $isLogin = $data['verify'] === '123456' && RuntimeService::check();
-            if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
+            if (Message::checkVerifyCode($data['verify'], $data['phone'])) {
                 Message::clearVerifyCode($data['phone']);
-                $bind = ['phone' => $data['phone']];
+                $map = $bind = ['phone' => $data['phone']];
                 if (!$this->account->isBind()) {
                     $user = $this->account->get();
                     $bind['headimg'] = $user['headimg'];
                     $bind['unionid'] = $user['unionid'];
                     $bind['nickname'] = $user['nickname'];
                 }
-                $this->account->bind(['phone' => $bind['phone']], $bind);
-                $this->success('关联成功!', $this->account->get());
+                $this->account->set($map);
+                $this->account->bind($map, $bind);
+                if (!empty($data['passwd'])) {
+                    $this->account->pwdModify($data['passwd']);
+                }
+                $this->success('关联成功!', $this->account->get(true));
             } else {
                 $this->error('验证失败');
             }

@@ -18,6 +18,8 @@ declare (strict_types=1);
 
 namespace plugin\account\service\contract;
 
+use plugin\account\model\PluginAccountUser;
+
 /**
  * 用户账号接口类
  * @class AccountInterface
@@ -28,9 +30,10 @@ interface AccountInterface
     /**
      * 读取子账号资料
      * @param boolean $rejwt
+     * @param boolean $refresh
      * @return array
      */
-    public function get(bool $rejwt = false): array;
+    public function get(bool $rejwt = false, bool $refresh = false): array;
 
     /**
      * 设置子账号资料
@@ -49,22 +52,34 @@ interface AccountInterface
     public function init($token = '', bool $isjwt = true): AccountInterface;
 
     /**
+     * 获取用户模型
+     * @return PluginAccountUser
+     */
+    public function user(): PluginAccountUser;
+
+    /**
+     * 获取用户编号
+     * @return string
+     */
+    public function getCode(): string;
+
+    /**
      * 获取终端类型
      * @return string
      */
-    public function type(): string;
+    public function getType(): string;
 
     /**
      * 获取用户编号
      * @return integer
      */
-    public function unid(): int;
+    public function getUnid(): int;
 
     /**
      * 获取终端编号
      * @return integer
      */
-    public function usid(): int;
+    public function getUsid(): int;
 
     /**
      * 绑定主账号
@@ -107,17 +122,18 @@ interface AccountInterface
 
     /**
      * 验证终端密码
-     * @param string $pwd
+     * @param string $pass
      * @return boolean
      */
-    public function pwdVerify(string $pwd): bool;
+    public function pwdVerify(string $pass): bool;
 
     /**
      * 修改终端密码
-     * @param string $pwd
+     * @param string $pass 待修改密码
+     * @param boolean $event 触发事件
      * @return boolean
      */
-    public function pwdModify(string $pwd): bool;
+    public function pwdModify(string $pass, bool $event = true): bool;
 
     /**
      * 刷新账号序号
