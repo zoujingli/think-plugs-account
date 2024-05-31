@@ -222,13 +222,32 @@ abstract class Account
     }
 
     /**
+     * 账号配置参数设置与读取
+     * @param null|array|string $data
+     * @return mixed|void|null
+     * @throws \think\admin\Exception
+     */
+    public static function config($data = null)
+    {
+        if (is_null($data)) {
+            return sysdata('plugin.account.access');
+        } elseif (is_array($data)) {
+            return sysdata('plugin.account.access', $data);
+        } elseif (is_string($data)) {
+            return sysdata('plugin.account.access')[$data] ?? null;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * 是否自动注册
      * @return boolean
      * @throws \think\admin\Exception
      */
     public static function enableAutoReigster(): bool
     {
-        return empty(sysdata('plugin.account.access')['disRegister']);
+        return empty(self::config('disRegister'));
     }
 
     /**

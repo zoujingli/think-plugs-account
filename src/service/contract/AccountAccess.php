@@ -240,8 +240,12 @@ class AccountAccess implements AccountInterface
         // 自动生成用户昵称
         if (empty($data['nickname']) && empty($this->user->getAttr('nickname'))) {
             if (empty($data['nickname'] = $this->bind->getAttr('nickname'))) {
-                $name = Account::get($this->type)['name'] ?? $this->type;
-                $data['nickname'] = "{$name}{$this->bind->getAttr('id')}";
+                $prefix = Account::config('userPrefix') ?: (Account::get($this->type)['name'] ?? $this->type);
+                if ($phone = $data['phone'] ?? $this->user->getAttr('phone')) {
+                    $data['nickname'] = $prefix . substr($phone, -4);
+                } else {
+                    $data['nickname'] = "{$prefix}{$this->bind->getAttr('id')}";
+                }
             }
         }
         // 同步用户登录密码
