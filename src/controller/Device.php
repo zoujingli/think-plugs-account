@@ -51,7 +51,7 @@ class Device extends Controller
     }
 
     /**
-     * 接口终端配置
+     * 账号接口配置
      * @auth true
      * @return void
      * @throws \think\admin\Exception
@@ -60,12 +60,12 @@ class Device extends Controller
     {
         $this->types = Account::types();
         if ($this->request->isGet()) {
-            $this->data = sysdata('plugin.account.access');
+            $this->data = Account::config();
             $this->data['headimg'] = Account::headimg();
             $this->fetch();
         } else {
             // 保存当前参数
-            sysdata('plugin.account.access', $this->request->post());
+            Account::config($this->request->post());
             // 设置接口有效时间及默认头像
             $expire = $this->request->post('expire');
             $headimg = $this->request->post('headimg');

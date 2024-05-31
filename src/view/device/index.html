@@ -2,7 +2,7 @@
 
 {block name="button"}
 <!--{if auth("config")}-->
-<button data-modal="{:url('config')}" data-width="650px" data-title="接口终端配置" class='layui-btn layui-btn-sm layui-btn-primary'>接口配置</button>
+<button data-modal="{:url('config')}" data-width="800px" data-title="账号接口配置" class='layui-btn layui-btn-sm layui-btn-primary'>账号配置</button>
 <!--{/if}-->
 {/block}
 
@@ -23,7 +23,7 @@
 
 <script>
     $(function () {
-        $('#UserTable').layTable({
+        let $table = $('#UserTable').layTable({
             even: true, height: 'full',
             sort: {field: 'sort desc,id', type: 'desc'},
             cols: [[
@@ -50,11 +50,8 @@
         layui.form.on('switch(StatusSwitch)', function (obj) {
             let data = {id: obj.value, status: obj.elem.checked > 0 ? 1 : 0};
             $.form.load("{:url('state')}", data, 'post', function (ret) {
-                if (ret.code < 1) $.msg.error(ret.info, 3, function () {
-                    $('#UserTable').trigger('reload');
-                }); else {
-                    $('#UserTable').trigger('reload')
-                }
+                let fn = () => $table.trigger('reload');
+                ret.code > 0 ? fn() : $.msg.error(ret.info, 3, fn);
                 return false;
             }, false);
         });
