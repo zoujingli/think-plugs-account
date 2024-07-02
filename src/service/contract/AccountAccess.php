@@ -194,7 +194,7 @@ class AccountAccess implements AccountInterface
      */
     public function pwdVerify(string $pass): bool
     {
-        $pass = md5("Think{$pass}Admin");
+        $pass = md5($pass);
         if ($this->user->getAttr('password') === $pass) return !!$this->expire();
         return $this->bind->getAttr('password') === $pass && $this->expire();
     }
@@ -208,7 +208,7 @@ class AccountAccess implements AccountInterface
     public function pwdModify(string $pass, bool $event = true): bool
     {
         if ($this->bind->isEmpty()) return false;
-        $data = ['password' => md5("Think{$pass}Admin")];
+        $data = ['password' => md5($pass)];
         $this->user->isExists() && $this->user->save($data);
         if (!$this->bind->save($data)) return false;
         if ($event) $this->app->event->trigger('PluginAccountChangePassword', [
