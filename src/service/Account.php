@@ -31,12 +31,12 @@ use think\admin\extend\JwtExtend;
  */
 abstract class Account
 {
-    const WAP = 'wap';
-    const WEB = 'web';
-    const WXAPP = 'wxapp';
-    const WECHAT = 'wechat';
-    const IOSAPP = 'iosapp';
-    const ANDROID = 'android';
+    public const WAP = 'wap';
+    public const WEB = 'web';
+    public const WXAPP = 'wxapp';
+    public const WECHAT = 'wechat';
+    public const IOSAPP = 'iosapp';
+    public const ANDROID = 'android';
 
     // 已禁用的账号通道
     private static $denys = null;
