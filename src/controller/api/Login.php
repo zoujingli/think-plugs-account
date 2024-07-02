@@ -18,6 +18,7 @@ declare (strict_types=1);
 
 namespace plugin\account\controller\api;
 
+use plugin\account\model\PluginAccountUser;
 use plugin\account\service\Account;
 use plugin\account\service\Message;
 use think\admin\Controller;
@@ -87,14 +88,11 @@ class Login extends Controller
             $data = $this->_vali(['code.require' => '授权编号为空！']);
             $vars = CodeExtend::decrypt($data['code'], JwtExtend::jwtkey());
             if (is_array($vars) && isset($vars['unid'])) {
-                $account = Account::mk('', ['unid' => $vars['unid'], 'deleted' => 0]);
-                if ($account->isNull()) $this->error('登录失败！');
-                if ($account->getType() !== Account::WAP) {
-                    $inset = ['phone' => $account->get()['phone']];
-                    $account = Account::mk(Account::WAP, $inset);
-                    $account->isNull() && $account->set($inset);
-                    $account->isBind() || $account->bind($inset, $inset);
-                }
+                $user = PluginAccountUser::mk()->findOrEmpty($vars['unid']);
+                if ($user->isEmpty()) $this->error('无效账号！');
+                $inset = ['phone' => $user->getAttr('phone')];
+                $account = Account::mk(Account::WAP, $inset);
+                $account->set(['unid' => $user->getAttr('id')] + $inset);
                 $this->success('登录成功！', $account->token()->get(true));
             } else {
                 $this->error('解密失败！');
